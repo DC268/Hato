@@ -1,0 +1,6 @@
+{
+  "name": "HATO - Monitoreo GPS y Ganadería Inteligente",
+  "description": "Sistema de monitoreo de ganado en tiempo real con geocercas, telemetría de collares GPS, alertas de escape e inactividad y motor de reglas POO.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

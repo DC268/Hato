@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" name="viewport"/><meta content="mobile_tab" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,700;1,400;1,700&amp;family=Barlow+Condensed:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { colors: { "on-surface": "#191c18", "primary-container": "#2e6b34", "on-primary-fixed-variant": "#12521e", "error": "#ba1a1a", "inverse-on-surface": "#eff2eb", "on-error": "#ffffff", "on-primary-container": "#a7e9a5", "tertiary-fixed-dim": "#e7c090", "error-container": "#ffdad6", "tertiary": "#5d421c", "inverse-primary": "#95d693", "outline-variant": "#c0c9bc", "tertiary-container": "#775931", "primary-fixed": "#b0f3ad", "surface-dim": "#d9dbd4", "secondary-fixed-dim": "#8dcef7", "surface-container-low": "#f2f4ed", "surface": "#f8faf3", "on-background": "#191c18", "surface-container": "#edefe8", "on-error-container": "#93000a", "on-secondary-fixed-variant": "#004c6a", "surface-tint": "#2e6b34", "primary": "#12521e", "outline": "#71796e", "secondary": "#156589", "inverse-surface": "#2e312d", "secondary-fixed": "#c5e7ff", "surface-container-high": "#e7e9e2", "on-tertiary-fixed-variant": "#5c421c", "on-secondary-container": "#005d80", "on-primary": "#ffffff", "surface-variant": "#e1e3dc", "on-secondary": "#ffffff", "on-secondary-fixed": "#001e2d", "primary-fixed-dim": "#95d693", "on-tertiary": "#ffffff", "surface-container-lowest": "#ffffff", "tertiary-fixed": "#ffddb5", "surface-container-highest": "#e1e3dc", "surface-bright": "#f8faf3", "secondary-container": "#92d4fd", "on-tertiary-fixed": "#2a1800", "on-primary-fixed": "#002106", "on-surface-variant": "#41493f", "on-tertiary-container": "#fbd2a1", "background": "#f8faf3" }, borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, spacing: { "gutter-lg": "1.5rem", "margin": "1rem", "space-xs": "0.25rem", "gutter": "1rem", "margin-lg": "1.5rem", "space-md": "1rem", "space-sm": "0.5rem", "margin-sm": "0.75rem", "space-lg": "1.5rem", "space-xl": "2rem", "gutter-sm": "0.75rem" }, fontFamily: { "label-lg": ["Atkinson Hyperlegible Next"], "body-md": ["Atkinson Hyperlegible Next"], "headline-lg": ["Barlow Condensed"], "display-lg": ["Barlow Condensed"], "display-sm": ["Barlow Condensed"], "headline-sm": ["Barlow Condensed"], "body-sm": ["Atkinson Hyperlegible Next"], "title-lg": ["Atkinson Hyperlegible Next"], "label-md": ["Atkinson Hyperlegible Next"], "headline-md": ["Barlow Condensed"], "title-md": ["Atkinson Hyperlegible Next"], "label-sm": ["Atkinson Hyperlegible Next"], "body-lg": ["Atkinson Hyperlegible Next"] }, fontSize: { "label-lg": ["15px", { lineHeight: "20px", letterSpacing: "0.5px", fontWeight: "700" }], "body-md": ["14px", { lineHeight: "20px", letterSpacing: "0.25px", fontWeight: "400" }], "headline-lg": ["28px", { lineHeight: "32px", letterSpacing: "0.25px", fontWeight: "700" }], "display-lg": ["48px", { lineHeight: "52px", letterSpacing: "-0.5px", fontWeight: "700" }], "display-sm": ["36px", { lineHeight: "40px", letterSpacing: "0px", fontWeight: "700" }], "headline-sm": ["20px", { lineHeight: "24px", letterSpacing: "0.15px", fontWeight: "600" }], "body-sm": ["12px", { lineHeight: "16px", letterSpacing: "0.4px", fontWeight: "400" }], "title-lg": ["18px", { lineHeight: "24px", letterSpacing: "0.15px", fontWeight: "700" }], "label-md": ["12px", { lineHeight: "16px", letterSpacing: "0.5px", fontWeight: "700" }], "headline-md": ["24px", { lineHeight: "28px", letterSpacing: "0.25px", fontWeight: "600" }], "title-md": ["16px", { lineHeight: "22px", letterSpacing: "0.15px", fontWeight: "700" }], "label-sm": ["11px", { lineHeight: "14px", letterSpacing: "0.5px", fontWeight: "700" }], "body-lg": ["16px", { lineHeight: "24px", letterSpacing: "0.5px", fontWeight: "400" }] } } } };</script><style>@layer base{html,body{width:100vw;margin:0;padding:0;}body{overscroll-behavior:none;}.pb-safe{padding-bottom:env(safe-area-inset-bottom,0px);}.pt-safe{padding-top:env(safe-area-inset-top,0px);}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased flex flex-col min-h-screen"><header class="fixed top-0 w-full z-50 pt-safe bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="h-16 px-margin flex items-center justify-between"><div class="flex items-center gap-space-sm min-w-0"><img alt="Hato Logo" class="h-8 w-auto object-contain flex-shrink-0" src="https://lh3.googleusercontent.com/aida/AEtjO1X9odRuLB8ViyWqfZROXLxFx-G2UJpffp0ggt2liMFN0J6eRPS0XSlpYvjgbqiZE4QwE5TMXwcx1u7uPxFlU0rOnVVoihSl67gN2ILviLz0WDmIX5LnHAUJH3Ke5dsJRhLBPPvIdRXAMFrPshiSmIolXZEtb7I6GCBM4Vs1N4S5AC3xNliE7pLwjtxEa9pUiWDwbctqIKzs4OQT19a4UIk4aj7YfvSPAUj5MR_T7aJhOUl6Ky-teb8DrM8"/><span class="font-headline-md text-headline-md tracking-tight uppercase text-primary truncate">Hato</span><span class="text-outline text-title-md font-title-md mx-space-xs font-light">/</span><h1 class="font-headline-sm text-headline-sm text-on-surface truncate tracking-normal uppercase">Animales</h1></div><div class="flex items-center gap-space-sm flex-shrink-0"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="flex-1 flex flex-col relative w-full pt-16 pb-20 bg-surface"><div class="flex flex-col w-full pb-28">
+<!-- Status & Context Overview Card -->
+<div class="px-margin pt-space-sm pb-space-xs">
+<div class="bg-surface-container-high rounded-xl p-space-md shadow-sm">
+<div class="flex items-center justify-between">
+<div>
+<span class="font-headline-lg text-headline-lg uppercase tracking-tight text-primary block leading-none">
+            Animales
+          </span>
+<span class="font-body-sm text-body-sm text-on-surface-variant font-bold mt-1 inline-flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-primary inline-block"></span>
+            27 animales registrados
+          </span>
+</div>
+<div class="flex items-center gap-1.5 bg-surface-container-lowest px-3 py-1.5 rounded-full shadow-sm">
+<span class="material-symbols-outlined text-[18px] text-error">warning</span>
+<span class="font-label-sm text-label-sm text-on-surface font-bold">1 crítico</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Search & Action Row -->
+<div class="px-margin py-space-xs">
+<div class="relative flex items-center gap-2">
+<div class="relative flex-1">
+<div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline text-[22px]">search</span>
+</div>
+<input class="w-full min-h-[52px] pl-11 pr-10 bg-surface-container-lowest rounded-xl font-body-md text-body-md text-on-surface placeholder:text-outline focus:outline-none focus:ring-2 focus:ring-primary shadow-sm" id="search-input" placeholder="Buscar por número, arete o nombre..." type="text"/>
+<button aria-label="Limpiar búsqueda" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center justify-center min-w-[44px] text-outline active:text-on-surface" id="clear-search">
+<span class="material-symbols-outlined text-[20px]">close</span>
+</button>
+</div>
+<button aria-label="Filtros avanzados" class="min-h-[52px] min-w-[52px] bg-surface-container-lowest active:bg-surface-container rounded-xl flex items-center justify-center shadow-sm text-primary transition-colors">
+<span class="material-symbols-outlined text-[24px]">tune</span>
+</button>
+</div>
+</div>
+<!-- Horizontal Filter Chips (Tactile 40dp min, swipe-scrollable) -->
+<div class="py-space-xs">
+<div class="flex items-center gap-2 overflow-x-auto px-margin no-scrollbar">
+<!-- Active Chip: Verde brote (#CDE8C8) -->
+<button class="chip-filter flex-shrink-0 h-10 px-4 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center gap-1.5 font-label-md text-label-md shadow-sm transition-all" data-filter="all" type="button">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">check</span>
+<span>Todos (27)</span>
+</button>
+<!-- Warning Chip -->
+<button class="chip-filter flex-shrink-0 h-10 px-3.5 rounded-full bg-surface-container-lowest active:bg-surface-container text-error flex items-center gap-1.5 font-label-md text-label-md shadow-sm transition-all" data-filter="danger" type="button">
+<span class="material-symbols-outlined text-[18px]">warning</span>
+<span>Fuera (1)</span>
+</button>
+<!-- Offline Chip -->
+<button class="chip-filter flex-shrink-0 h-10 px-3.5 rounded-full bg-surface-container-lowest active:bg-surface-container text-on-surface-variant flex items-center gap-1.5 font-label-md text-label-md shadow-sm transition-all" data-filter="offline" type="button">
+<span class="material-symbols-outlined text-[18px]">signal_disconnected</span>
+<span>Sin señal (2)</span>
+</button>
+<!-- Battery Chip -->
+<button class="chip-filter flex-shrink-0 h-10 px-3.5 rounded-full bg-surface-container-lowest active:bg-surface-container text-tertiary flex items-center gap-1.5 font-label-md text-label-md shadow-sm transition-all" data-filter="battery" type="button">
+<span class="material-symbols-outlined text-[18px]">battery_alert</span>
+<span>Batería baja (2)</span>
+</button>
+</div>
+</div>
+<!-- Livestock List -->
+<div class="px-margin flex flex-col gap-3 mt-space-xs">
+<!-- Card 1: Crítica (Vaca 03) -->
+<article class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-3 active:scale-[0.99] transition-transform cursor-pointer" data-item-type="danger">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-xl bg-error-container text-on-error-container flex items-center justify-center font-headline-md text-headline-md shrink-0">
+            03
+          </div>
+<div>
+<div class="flex items-baseline gap-2">
+<h2 class="font-headline-md text-headline-md text-on-surface leading-tight">Vaca 03</h2>
+<span class="font-label-sm text-label-sm bg-surface-container-high px-2 py-0.5 rounded text-on-surface-variant uppercase font-bold">#0342</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+              Última posición: Hace 4 min
+            </p>
+</div>
+</div>
+<button aria-label="Ver detalle de Vaca 03" class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant shrink-0">
+<span class="material-symbols-outlined text-[22px]">chevron_right</span>
+</button>
+</div>
+<!-- Pill State & Telemetry Grid -->
+<div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-error-container text-on-error-container font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">warning</span>
+<span>Fuera de la zona</span>
+</div>
+<div class="flex items-center gap-3 text-tertiary font-label-md text-label-md bg-tertiary-fixed/30 px-2.5 py-1 rounded-lg">
+<span class="material-symbols-outlined text-[18px] text-tertiary" style="font-variation-settings: 'FILL' 1;">battery_alert</span>
+<span class="font-bold">15%</span>
+</div>
+</div>
+</article>
+<!-- Card 2: Atención (Novillo 21) -->
+<article class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-3 active:scale-[0.99] transition-transform cursor-pointer" data-item-type="offline">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-xl bg-surface-container-high text-on-surface-variant flex items-center justify-center font-headline-md text-headline-md shrink-0">
+            21
+          </div>
+<div>
+<div class="flex items-baseline gap-2">
+<h2 class="font-headline-md text-headline-md text-on-surface leading-tight">Novillo 21</h2>
+<span class="font-label-sm text-label-sm bg-surface-container-high px-2 py-0.5 rounded text-on-surface-variant uppercase font-bold">#0881</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">cell_tower</span>
+              Collar GPS V3
+            </p>
+</div>
+</div>
+<button aria-label="Ver detalle de Novillo 21" class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant shrink-0">
+<span class="material-symbols-outlined text-[22px]">chevron_right</span>
+</button>
+</div>
+<!-- State & Telemetry Grid -->
+<div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">signal_disconnected</span>
+<span>Sin señal desde las 14:20</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-label-md text-label-md bg-surface-container px-2.5 py-1 rounded-lg">
+<span class="material-symbols-outlined text-[18px]">battery_4_bar</span>
+<span class="font-bold">64%</span>
+</div>
+</div>
+</article>
+<!-- Card 3: Normal (Vaca 12) -->
+<article class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-3 active:scale-[0.99] transition-transform cursor-pointer" data-item-type="normal">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-xl bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-headline-md text-headline-md shrink-0">
+            12
+          </div>
+<div>
+<div class="flex items-baseline gap-2">
+<h2 class="font-headline-md text-headline-md text-on-surface leading-tight">Vaca 12</h2>
+<span class="font-label-sm text-label-sm bg-surface-container-high px-2 py-0.5 rounded text-on-surface-variant uppercase font-bold">#0112</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">schedule</span>
+              Última posición: Hace 2 min
+            </p>
+</div>
+</div>
+<button aria-label="Ver detalle de Vaca 12" class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant shrink-0">
+<span class="material-symbols-outlined text-[22px]">chevron_right</span>
+</button>
+</div>
+<!-- State & Telemetry Grid -->
+<div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-fixed/40 text-primary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Dentro (Potrero Norte)</span>
+</div>
+<div class="flex items-center gap-2 text-primary font-label-md text-label-md bg-primary-fixed/30 px-2.5 py-1 rounded-lg">
+<span class="material-symbols-outlined text-[18px]">battery_full</span>
+<span class="font-bold">92%</span>
+</div>
+</div>
+</article>
+<!-- Card 4: Normal con Raza (Toro Barcino) -->
+<article class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-3 active:scale-[0.99] transition-transform cursor-pointer" data-item-type="normal">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-xl bg-primary-fixed text-on-primary-fixed flex items-center justify-center font-headline-md text-headline-md shrink-0">
+            TB
+          </div>
+<div>
+<div class="flex items-baseline gap-2 flex-wrap">
+<h2 class="font-headline-md text-headline-md text-on-surface leading-tight">Toro Barcino</h2>
+<span class="font-label-sm text-label-sm bg-surface-container-high px-2 py-0.5 rounded text-on-surface-variant uppercase font-bold">#0004</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">pets</span>
+              Raza Brahman Reproductivo
+            </p>
+</div>
+</div>
+<button aria-label="Ver detalle de Toro Barcino" class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant shrink-0">
+<span class="material-symbols-outlined text-[22px]">chevron_right</span>
+</button>
+</div>
+<!-- State & Telemetry Grid -->
+<div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary-fixed/40 text-primary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>Dentro (Potrero Sur)</span>
+</div>
+<div class="flex items-center gap-2 text-primary font-label-md text-label-md bg-primary-fixed/30 px-2.5 py-1 rounded-lg">
+<span class="material-symbols-outlined text-[18px]">battery_5_bar</span>
+<span class="font-bold">85%</span>
+</div>
+</div>
+</article>
+<!-- Card 5: Inactiva / Quieto (Ternera 07) -->
+<article class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-3 active:scale-[0.99] transition-transform cursor-pointer" data-item-type="inactive">
+<div class="flex items-start justify-between gap-2">
+<div class="flex items-center gap-3">
+<div class="w-12 h-12 rounded-xl bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-headline-md text-headline-md shrink-0">
+            07
+          </div>
+<div>
+<div class="flex items-baseline gap-2">
+<h2 class="font-headline-md text-headline-md text-on-surface leading-tight">Ternera 07</h2>
+<span class="font-label-sm text-label-sm bg-surface-container-high px-2 py-0.5 rounded text-on-surface-variant uppercase font-bold">#0923</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1 mt-0.5">
+<span class="material-symbols-outlined text-[14px]">location_on</span>
+              Bebedero Central
+            </p>
+</div>
+</div>
+<button aria-label="Ver detalle de Ternera 07" class="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center text-on-surface-variant shrink-0">
+<span class="material-symbols-outlined text-[22px]">chevron_right</span>
+</button>
+</div>
+<!-- State & Telemetry Grid (Purpura / Secondary tone) -->
+<div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+<div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary-fixed-dim/40 text-secondary font-label-md text-label-md">
+<span class="material-symbols-outlined text-[18px]">hourglass_top</span>
+<span>Quieto hace 6 h</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant font-label-md text-label-md bg-surface-container px-2.5 py-1 rounded-lg">
+<span class="material-symbols-outlined text-[18px]">battery_full</span>
+<span class="font-bold">78%</span>
+</div>
+</div>
+</article>
+</div>
+<!-- Empty state placeholder (hidden initially, triggered by search filter) -->
+<div class="hidden px-margin py-10 flex flex-col items-center justify-center text-center" id="no-results">
+<div class="w-16 h-16 rounded-full bg-surface-container-high flex items-center justify-center text-outline mb-3">
+<span class="material-symbols-outlined text-[32px]">search_off</span>
+</div>
+<p class="font-headline-sm text-headline-sm text-on-surface">No se encontraron animales</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Revisa el arete o limpia los filtros rápidos.</p>
+</div>
+<!-- Prominent Field Floating Action Button (FAB) -->
+<!-- Anchored in comfortable lower thumb reach zone with 52dp height -->
+<div class="fixed bottom-24 right-4 z-40">
+<button aria-label="Registrar nuevo animal en el hato" class="h-[52px] px-5 rounded-full bg-primary text-on-primary flex items-center gap-2 shadow-lg active:bg-primary-container active:scale-95 transition-transform" id="add-animal-btn" type="button">
+<span class="material-symbols-outlined text-[24px]">add</span>
+<span class="font-label-lg text-label-lg uppercase tracking-wider">Agregar animal</span>
+</button>
+</div>
+</div>
+<script>
+  // Simple field micro-interactions for rancher responsiveness
+  const searchInput = document.getElementById('search-input');
+  const clearBtn = document.getElementById('clear-search');
+  const cards = document.querySelectorAll('article[data-item-type]');
+  const chips = document.querySelectorAll('.chip-filter');
+  const emptyState = document.getElementById('no-results');
+
+  // Clear button toggle
+  searchInput.addEventListener('input', (e) => {
+    const val = e.target.value.trim().toLowerCase();
+    clearBtn.classList.toggle('hidden', val.length === 0);
+    filterList();
+  });
+
+  clearBtn.addEventListener('click', () => {
+    searchInput.value = '';
+    clearBtn.classList.add('hidden');
+    filterList();
+    searchInput.focus();
+  });
+
+  // Filter chips state toggle
+  chips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      chips.forEach(c => {
+        c.className = "chip-filter flex-shrink-0 h-10 px-3.5 rounded-full bg-surface-container-lowest text-on-surface-variant flex items-center gap-1.5 font-label-md text-label-md shadow-sm transition-all";
+        const icon = c.querySelector('.material-symbols-outlined');
+        if (icon && icon.textContent === 'check') {
+          // Revert icon if needed
+          icon.textContent = 'filter_list';
+        }
+      });
+      chip.className = "chip-filter flex-shrink-0 h-10 px-4 rounded-full bg-primary-fixed text-on-primary-fixed flex items-center gap-1.5 font-label-md text-label-md shadow-sm transition-all";
+      filterList();
+    });
+  });
+
+  function filterList() {
+    const term = searchInput.value.toLowerCase();
+    let visibleCount = 0;
+
+    cards.forEach(card => {
+      const text = card.textContent.toLowerCase();
+      const matches = text.includes(term);
+      card.style.display = matches ? 'flex' : 'none';
+      if (matches) visibleCount++;
+    });
+
+    if (emptyState) {
+      emptyState.classList.toggle('hidden', visibleCount > 0);
+    }
+  }
+
+  // Tactile feedback on FAB
+  const fab = document.getElementById('add-animal-btn');
+  if (fab) {
+    fab.addEventListener('click', () => {
+      if (navigator.vibrate) navigator.vibrate(25);
+    });
+  }
+</script></main><nav class="fixed bottom-0 w-full z-50 pb-safe bg-surface/90 backdrop-blur-xl shadow-[0_-2px_12px_rgba(0,0,0,0.05)]" data-active-classes="[&amp;&gt;[data-pill]]:bg-on-primary-container [&amp;&gt;[data-pill]]:text-primary font-bold text-primary"><div class="flex items-stretch justify-around h-20 px-space-xs"><a class="group flex-1 min-w-[48px] flex flex-col items-center justify-center py-space-xs px-1 text-on-surface-variant transition-colors" data-path="mapa" href="#"><div class="w-14 h-8 rounded-full flex items-center justify-center transition-colors mb-0.5" data-pill=""><span class="material-symbols-outlined text-[24px]">map</span></div><span class="font-label-sm text-label-sm leading-tight tracking-wider truncate">Mapa</span></a><a aria-current="page" class="group flex-1 min-w-[48px] flex flex-col items-center justify-center py-space-xs px-1 transition-colors [&amp;&gt;[data-pill]]:bg-on-primary-container [&amp;&gt;[data-pill]]:text-primary font-bold text-primary" data-path="animales" href="#"><div class="w-14 h-8 rounded-full flex items-center justify-center transition-colors mb-0.5" data-pill=""><span class="material-symbols-outlined text-[24px]">pets</span></div><span class="font-label-sm text-label-sm leading-tight tracking-wider truncate">Animales</span></a><a class="group flex-1 min-w-[48px] flex flex-col items-center justify-center py-space-xs px-1 text-on-surface-variant transition-colors" data-path="zonas" href="#"><div class="w-14 h-8 rounded-full flex items-center justify-center transition-colors mb-0.5" data-pill=""><span class="material-symbols-outlined text-[24px]">fence</span></div><span class="font-label-sm text-label-sm leading-tight tracking-wider truncate">Zonas</span></a><a class="group flex-1 min-w-[48px] flex flex-col items-center justify-center py-space-xs px-1 text-on-surface-variant transition-colors" data-path="alertas" href="#"><div class="relative w-14 h-8 rounded-full flex items-center justify-center transition-colors mb-0.5" data-pill=""><span class="material-symbols-outlined text-[24px]">notifications</span><span class="absolute top-1 right-2.5 min-w-[16px] h-4 px-1 rounded-full bg-error text-on-error font-label-sm text-[10px] leading-4 flex items-center justify-center font-bold">2</span></div><span class="font-label-sm text-label-sm leading-tight tracking-wider truncate">Alertas</span></a><a class="group flex-1 min-w-[48px] flex flex-col items-center justify-center py-space-xs px-1 text-on-surface-variant transition-colors" data-path="mas" href="#"><div class="w-14 h-8 rounded-full flex items-center justify-center transition-colors mb-0.5" data-pill=""><span class="material-symbols-outlined text-[24px]">menu</span></div><span class="font-label-sm text-label-sm leading-tight tracking-wider truncate">Más</span></a></div></nav></body></html>
