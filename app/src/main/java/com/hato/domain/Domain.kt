@@ -132,3 +132,28 @@ class PolygonGeofence(
         return mBlue >= mRed
     }
 }
+
+// Clase para manejar Alertas del sistema
+data class AppAlert(
+    val title: String,
+    val description: String,
+    val time: String
+)
+
+// Función para calcular el área aproximada de un polígono en hectáreas
+fun calculateAreaHa(points: List<GeoPoint>): Float {
+    if (points.size < 3) return 0f
+    var area = 0.0
+    val earthRadius = 6378137.0
+    for (i in points.indices) {
+        val p1 = points[i]
+        val p2 = points[(i + 1) % points.size]
+        val lat1 = Math.toRadians(p1.lat)
+        val lat2 = Math.toRadians(p2.lat)
+        val lng1 = Math.toRadians(p1.lng)
+        val lng2 = Math.toRadians(p2.lng)
+        area += (lng2 - lng1) * (2.0 + sin(lat1) + sin(lat2))
+    }
+    area = abs(area * earthRadius * earthRadius / 2.0)
+    return (area / 10000.0).toFloat() // Convertir m^2 a Hectáreas
+}

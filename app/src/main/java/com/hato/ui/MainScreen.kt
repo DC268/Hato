@@ -77,7 +77,13 @@ fun MainScreen(viewModel: MapViewModel) {
             startDestination = Screen.Map.route,
             modifier = Modifier.padding(innerPadding)
         ) {
-            composable(Screen.Map.route) { MapScreen(viewModel) }
+            composable(Screen.Map.route) { 
+                MapScreen(
+                    viewModel = viewModel,
+                    onNavigateToSettings = { navController.navigate(Screen.Settings.route) },
+                    onNavigateToProfile = { navController.navigate("profile") }
+                ) 
+            }
             composable(Screen.Zones.route) { 
                 ZonesScreen(
                     viewModel = viewModel,
@@ -90,9 +96,10 @@ fun MainScreen(viewModel: MapViewModel) {
                     }
                 ) 
             }
-            composable(Screen.Alerts.route) { AlertsScreen() }
+            composable(Screen.Alerts.route) { AlertsScreen(viewModel) }
             composable(Screen.Animals.route) { AnimalsScreen(viewModel) }
-            composable(Screen.Settings.route) { SettingsScreen() }
+            composable(Screen.Settings.route) { SettingsScreen(viewModel) }
+            composable("profile") { com.hato.ui.screens.ProfileScreen() }
         }
     }
 }

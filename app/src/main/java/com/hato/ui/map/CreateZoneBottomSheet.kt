@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import com.hato.domain.calculateAreaHa
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -63,7 +64,12 @@ fun OptionsContent(viewModel: MapViewModel) {
 fun FormContent(viewModel: MapViewModel) {
     var zoneName by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("Lote de pastoreo rotacional") }
-    var areaHa by remember { mutableStateOf("15.0") }
+    
+    // Auto-calculamos el area en hectareas en base a los puntos que acaba de dibujar el usuario
+    val calculatedArea = remember {
+        calculateAreaHa(viewModel.currentDrawingPoints).toString()
+    }
+    var areaHa by remember { mutableStateOf(calculatedArea) }
     var tolerance by remember { mutableStateOf("15") }
 
     OutlinedTextField(

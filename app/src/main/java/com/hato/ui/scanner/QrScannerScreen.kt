@@ -17,6 +17,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import android.Manifest
 import com.hato.domain.Animal
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -27,9 +30,21 @@ fun QrScannerScreen(
     onClose: () -> Unit,
     onAnimalScanned: (Animal) -> Unit
 ) {
-    var isScanning by remember { mutableStateOf(true) }
+    var isScanning by remember { mutableStateOf(false) }
+    var hasCameraPermission by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        hasCameraPermission = isGranted
+        if (isGranted) isScanning = true
+    }
+
+    LaunchedEffect(Unit) {
+        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+    }
+
     val infiniteTransition = rememberInfiniteTransition(label = "laser_animation")
     val laserOffset by infiniteTransition.animateFloat(
         initialValue = 0f,

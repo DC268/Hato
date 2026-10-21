@@ -1,7 +1,14 @@
 package com.hato.ui.map
 
+import android.Manifest
+import android.annotation.SuppressLint
+import android.location.Location
+import android.os.Looper
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,13 +20,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.google.android.gms.location.*
 import com.hato.domain.HealthStatus
 import com.hato.domain.PolygonGeofence
 import com.hato.ui.scanner.QrScannerScreen
@@ -31,56 +38,108 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
-import androidx.compose.foundation.clickable
+import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
+import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
-@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("MissingPermission")
 @Composable
-fun MapScreen(viewModel: MapViewModel) {
+fun MapScreen(
+    viewModel: MapViewModel,
+    onNavigateToSettings: () -> Unit,
+    onNavigateToProfile: () -> Unit
+) {
     var showQrScanner by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
-    if (showQrScanner) {
-        QrScannerScreen(
-            animals = viewModel.animals,
-            onClose = { showQrScanner = false },
-            onAnimalScanned = { animal ->
-                viewModel.selectedAnimal = animal
-                showQrScanner = false
+    // Configuraciones de Ubicación
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+    val mapView = remember { MapView(context) }
+    var locationPermissionGranted by remember { mutableStateOf(false) }
+    val myLocationOverlay = remember { MyLocationNewOverlay(GpsMyLocationProvider(context), mapView) }
+
+    // Launcher para pedir permisos
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        locationPermissionGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                                  permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        
+        if (locationPermissionGranted) {
+            myLocationOverlay.enableMyLocation()
+            // Auto-centrar en la última ubicación conocida
+            fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                if (location != null) {
+                    mapView.controller.setCenter(OsmGeoPoint(location.latitude, location.longitude))
+                }
             }
-        )
-        return
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        Configuration.getInstance().userAgentValue = context.packageName
+        mapView.setTileSource(TileSourceFactory.MAPNIK)
+        mapView.setMultiTouchControls(true)
+        mapView.controller.setZoom(16.0)
+        
+        // Agregar el listener de clicks
+        val mapEventsReceiver = object : MapEventsReceiver {
+            override fun singleTapConfirmedHelper(p: OsmGeoPoint): Boolean {
+                viewModel.addDrawingPoint(com.hato.domain.GeoPoint(p.latitude, p.longitude))
+                return true
+            }
+            override fun longPressHelper(p: OsmGeoPoint): Boolean = false
+        }
+        mapView.overlays.add(MapEventsOverlay(mapEventsReceiver))
+        
+        // Agregar la capa de mi ubicación
+        mapView.overlays.add(myLocationOverlay)
+        
+        permissionLauncher.launch(arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ))
+    }
+
+    // Efecto para el Tracking GPS
+    LaunchedEffect(viewModel.phoneAsTrackerEnabled, locationPermissionGranted) {
+        if (viewModel.phoneAsTrackerEnabled && locationPermissionGranted) {
+            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000L).build()
+            val locationCallback = object : LocationCallback() {
+                override fun onLocationResult(result: LocationResult) {
+                    result.lastLocation?.let { loc ->
+                        viewModel.processPhoneLocation(loc.latitude, loc.longitude)
+                    }
+                }
+            }
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper())
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color(0xFF2E312D))) {
         
         // 1. EL MAPA (AL FONDO - OPENSTREETMAP LIBRE)
-        val context = LocalContext.current
-        LaunchedEffect(Unit) {
-            Configuration.getInstance().userAgentValue = context.packageName
-        }
-
         AndroidView(
             modifier = Modifier.fillMaxSize(),
-            factory = { ctx ->
-                MapView(ctx).apply {
-                    setTileSource(TileSourceFactory.MAPNIK)
-                    setMultiTouchControls(true)
-                    controller.setZoom(16.0)
-                    controller.setCenter(OsmGeoPoint(10.4660, -84.6450))
+            factory = { mapView },
+            update = { view ->
+                val trigger = viewModel.mapUpdateTrigger // Leer estado para forzar recomposición
+                // Solo eliminamos los polígonos y marcadores que dibujamos nosotros para no borrar la capa base
+                view.overlays.removeAll { it is Polygon || it is Marker }
 
-                    val mapEventsReceiver = object : MapEventsReceiver {
-                        override fun singleTapConfirmedHelper(p: OsmGeoPoint): Boolean {
-                            viewModel.addDrawingPoint(com.hato.domain.GeoPoint(p.latitude, p.longitude))
-                            return true
+                // Dibujar animales reales y simulados
+                viewModel.animals.forEach { animal ->
+                    viewModel.animalPositions[animal.id]?.let { pos ->
+                        val marker = Marker(view).apply {
+                            position = OsmGeoPoint(pos.lat, pos.lng)
+                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                            title = "${animal.name} (${animal.displayNumber})"
+                            if (animal.id == "a-bt") {
+                                snippet = "📍 Ubicación en tiempo real de tu celular"
+                            }
                         }
-                        override fun longPressHelper(p: OsmGeoPoint): Boolean = false
+                        view.overlays.add(marker)
                     }
-                    overlays.add(MapEventsOverlay(mapEventsReceiver))
                 }
-            },
-            update = { mapView ->
-                // NUNCA hacer .clear() porque elimina las texturas del mapa base (TilesOverlay)
-                // En su lugar, solo eliminamos los polígonos y marcadores que hayamos dibujado nosotros
-                mapView.overlays.removeAll { it is Polygon || it is Marker }
 
                 // Dibujar zonas guardadas
                 viewModel.savedZones.forEach { zone ->
@@ -91,7 +150,7 @@ fun MapScreen(viewModel: MapViewModel) {
                             outlinePaint.color = android.graphics.Color.argb(255, 18, 82, 30)
                             outlinePaint.strokeWidth = 5f
                         }
-                        mapView.overlays.add(polygon)
+                        view.overlays.add(polygon)
                     }
                 }
 
@@ -103,17 +162,17 @@ fun MapScreen(viewModel: MapViewModel) {
                         outlinePaint.color = android.graphics.Color.argb(255, 255, 193, 7)
                         outlinePaint.strokeWidth = 5f
                     }
-                    mapView.overlays.add(drawingPolygon)
+                    view.overlays.add(drawingPolygon)
 
                     viewModel.currentDrawingPoints.forEach { point ->
-                        val marker = Marker(mapView).apply {
+                        val marker = Marker(view).apply {
                             position = OsmGeoPoint(point.lat, point.lng)
                             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                         }
-                        mapView.overlays.add(marker)
+                        view.overlays.add(marker)
                     }
                 }
-                mapView.invalidate()
+                view.invalidate()
             }
         )
 
@@ -159,7 +218,7 @@ fun MapScreen(viewModel: MapViewModel) {
                                 onClick = {
                                     viewModel.currentFarm = farm
                                     showFarmDropdown = false
-                                    // El mapa se centrará si extraemos la referencia o simplemente guardamos el centro en el estado
+                                    mapView.controller.animateTo(OsmGeoPoint(farm.center.lat, farm.center.lng))
                                 }
                             )
                         }
@@ -202,7 +261,16 @@ fun MapScreen(viewModel: MapViewModel) {
                         .size(50.dp)
                         .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(12.dp))
                 ) {
-                    Icon(Icons.Default.AccountBox, contentDescription = "Escanear QR")
+                    Icon(Icons.Default.AddCircle, contentDescription = "Escanear QR")
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                IconButton(
+                    onClick = onNavigateToProfile,
+                    modifier = Modifier
+                        .size(50.dp)
+                        .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(12.dp))
+                ) {
+                    Icon(Icons.Default.Person, contentDescription = "Perfil del Ganadero", tint = MaterialTheme.colorScheme.onPrimaryContainer)
                 }
             }
         }
@@ -211,29 +279,37 @@ fun MapScreen(viewModel: MapViewModel) {
         Column(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .padding(end = 16.dp, bottom = 280.dp),
+                .padding(end = 16.dp, bottom = if (viewModel.isBottomSheetExpanded) 320.dp else 100.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             FloatingActionButton(
-                onClick = { /* Zoom fit */ },
+                onClick = {
+                    viewModel.createZoneState = CreateZoneState.OPTIONS
+                },
                 containerColor = MaterialTheme.colorScheme.surface,
                 modifier = Modifier.size(48.dp)
             ) {
-                Icon(Icons.Default.Build, contentDescription = null)
+                Icon(Icons.Default.Build, contentDescription = "Modificar Geocerca")
             }
             FloatingActionButton(
-                onClick = { /* Ubicación */ },
+                onClick = { 
+                    val loc = myLocationOverlay.myLocation
+                    if (loc != null) {
+                        mapView.controller.setZoom(20.0) // Máximo acercamiento
+                        mapView.controller.animateTo(loc)
+                    }
+                },
                 containerColor = MaterialTheme.colorScheme.surface,
                 modifier = Modifier.size(48.dp)
             ) {
-                Icon(Icons.Default.LocationOn, contentDescription = null)
+                Icon(Icons.Default.LocationOn, contentDescription = "Ir a GPS")
             }
             FloatingActionButton(
-                onClick = { /* Capas */ },
+                onClick = onNavigateToSettings,
                 containerColor = MaterialTheme.colorScheme.surface,
                 modifier = Modifier.size(48.dp)
             ) {
-                Icon(Icons.Default.Menu, contentDescription = null)
+                Icon(Icons.Default.Menu, contentDescription = "Ajustes")
             }
         }
 
@@ -257,117 +333,138 @@ fun MapScreen(viewModel: MapViewModel) {
                         MaterialTheme.colorScheme.surface,
                         RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp)
                     )
-                    .padding(16.dp)
             ) {
-                // Drag handle
+                // Drag handle (Cerrar / Abrir)
                 Box(
-                    modifier = Modifier.width(40.dp).height(4.dp).clip(RoundedCornerShape(2.dp))
-                        .background(MaterialTheme.colorScheme.outlineVariant).align(Alignment.CenterHorizontally)
-                )
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Resumen de Animales (Counters)
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    Text("RESUMEN DE ANIMALES", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                    Text("Total: ${viewModel.animals.size} cabezas", color = MaterialTheme.colorScheme.outline, fontSize = 12.sp, fontWeight = FontWeight.Bold)
-                }
-                Spacer(modifier = Modifier.height(12.dp))
-
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    CounterCard(Modifier.weight(1f), "Dentro", "2", MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.primary)
-                    CounterCard(Modifier.weight(1f), "Fuera", "1", MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.error)
-                    CounterCard(Modifier.weight(1f), "Sin Señal", "0", MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Ficha del Animal Seleccionado (Vaca 03)
-                val activeAnimal = viewModel.selectedAnimal ?: viewModel.animals.first()
-                val isAlert = activeAnimal.healthStatus == HealthStatus.ALERT
-
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
-                    shape = RoundedCornerShape(16.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { viewModel.isBottomSheetExpanded = !viewModel.isBottomSheetExpanded }
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Box(
-                                    modifier = Modifier.size(48.dp).background(if (isAlert) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(activeAnimal.displayNumber, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
-                                }
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Column {
-                                    Text("${activeAnimal.name} • ${activeAnimal.breed}", fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                                    Text(
-                                        if (isAlert) "A 140m del Potrero (Fuga)" else "Pastando dentro del lindero",
-                                        color = if (isAlert) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-                                        fontSize = 12.sp, fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
-                            Surface(
-                                color = if (isAlert) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer,
-                                shape = RoundedCornerShape(50)
-                            ) {
-                                Text(
-                                    if (isAlert) "FUGA ACTIVA" else "DENTRO",
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    fontSize = 10.sp, fontWeight = FontWeight.Bold,
-                                    color = if (isAlert) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
+                    Box(
+                        modifier = Modifier
+                            .width(40.dp)
+                            .height(4.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(MaterialTheme.colorScheme.outlineVariant)
+                    )
+                }
 
+                if (viewModel.isBottomSheetExpanded) {
+                    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+                        // Resumen de Animales (Counters)
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                            Text("RESUMEN DE ANIMALES", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
+                            Text("Total: ${viewModel.animals.size} cabezas", color = MaterialTheme.colorScheme.outline, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                        }
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            CounterCard(Modifier.weight(1f), "Dentro", "2", MaterialTheme.colorScheme.primaryContainer, MaterialTheme.colorScheme.primary)
+                            CounterCard(Modifier.weight(1f), "Fuera", "1", MaterialTheme.colorScheme.errorContainer, MaterialTheme.colorScheme.error)
+                            CounterCard(Modifier.weight(1f), "Sin Señal", "0", MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        // Grid de Telemetría
-                        Row(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp)).padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-                            TelemetryItem("Velocidad", "${viewModel.activePosition.speedKmh} km/h")
-                            TelemetryItem("Batería", "${viewModel.activePosition.batteryPercent}%")
-                            TelemetryItem("Último reporte", "Hace 45s")
-                        }
+                        // Ficha del Animal Seleccionado (Vaca 03)
+                        val activeAnimal = viewModel.selectedAnimal ?: viewModel.animals.first()
+                        val isAlert = activeAnimal.healthStatus == HealthStatus.ALERT
 
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        // Botones de acción rápida
-                        Button(
-                            onClick = { },
-                            modifier = Modifier.fillMaxWidth().height(48.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.secondary,
-                                contentColor = MaterialTheme.colorScheme.onSecondary // Forzar texto claro (blanco) sobre el botón azul
-                            ),
-                            shape = RoundedCornerShape(12.dp)
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                            shape = RoundedCornerShape(16.dp)
                         ) {
-                            Icon(Icons.Default.LocationOn, contentDescription = null, modifier = Modifier.size(18.dp))
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text("CÓMO LLEGAR (RUTA RÁPIDA)", fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                        }
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Box(
+                                            modifier = Modifier.size(48.dp).background(if (isAlert) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary, RoundedCornerShape(12.dp)),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(activeAnimal.displayNumber, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                                        }
+                                        Spacer(modifier = Modifier.width(12.dp))
+                                        Column {
+                                            Text("${activeAnimal.name} • ${activeAnimal.breed}", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
+                                            Text(
+                                                if (isAlert) "A 140m del Potrero (Fuga)" else "Pastando dentro del lindero",
+                                                color = if (isAlert) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                                                fontSize = 12.sp, fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                    }
+                                    Surface(
+                                        color = if (isAlert) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer,
+                                        shape = RoundedCornerShape(50)
+                                    ) {
+                                        Text(
+                                            if (isAlert) "FUGA ACTIVA" else "DENTRO",
+                                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                            fontSize = 10.sp, fontWeight = FontWeight.Bold,
+                                            color = if (isAlert) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                }
 
-                        Spacer(modifier = Modifier.height(8.dp))
+                                Spacer(modifier = Modifier.height(16.dp))
 
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            OutlinedButton(
-                                onClick = { }, 
-                                modifier = Modifier.weight(1f).height(48.dp), 
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
-                            ) {
-                                Text("VER RECORRIDO", fontSize = 10.sp, fontWeight = FontWeight.Bold)
-                            }
-                            OutlinedButton(
-                                onClick = { }, 
-                                modifier = Modifier.weight(1f).height(48.dp), 
-                                shape = RoundedCornerShape(12.dp),
-                                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
-                            ) {
-                                Text("VER FICHA", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                // Grid de Telemetría
+                                Row(modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.surface, RoundedCornerShape(12.dp)).padding(12.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                                    TelemetryItem("Velocidad", "${viewModel.activePosition.speedKmh} km/h")
+                                    TelemetryItem("Batería", "${viewModel.activePosition.batteryPercent}%")
+                                    TelemetryItem("Último reporte", "Hace 45s")
+                                }
+
+                                Spacer(modifier = Modifier.height(16.dp))
+
+                                // Botones de acción rápida
+                                Button(
+                                    onClick = { },
+                                    modifier = Modifier.fillMaxWidth().height(48.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.secondary,
+                                        contentColor = MaterialTheme.colorScheme.onSecondary
+                                    ),
+                                    shape = RoundedCornerShape(12.dp)
+                                ) {
+                                    Icon(Icons.Default.LocationOn, contentDescription = null, modifier = Modifier.size(18.dp))
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text("CÓMO LLEGAR (RUTA RÁPIDA)", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                }
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    OutlinedButton(
+                                        onClick = { }, 
+                                        modifier = Modifier.weight(1f).height(48.dp), 
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
+                                    ) {
+                                        Text("VER RECORRIDO", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                    }
+                                    OutlinedButton(
+                                        onClick = { }, 
+                                        modifier = Modifier.weight(1f).height(48.dp), 
+                                        shape = RoundedCornerShape(12.dp),
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
+                                    ) {
+                                        Text("VER FICHA", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                    }
+                                }
                             }
                         }
                     }
+                } else {
+                    // Estado minimizado
+                    Text(
+                        "Resumen: ${viewModel.animals.size} cabezas (Toque para expandir)",
+                        modifier = Modifier.padding(bottom = 16.dp).align(Alignment.CenterHorizontally),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
         }

@@ -47,6 +47,9 @@ dependencies {
     // Free Maps (OSMDroid OpenStreetMap)
     implementation("org.osmdroid:osmdroid-android:6.1.18")
     
+    // GPS / Location Services
+    implementation("com.google.android.gms:play-services-location:21.1.0")
+    
     // Navigation Compose
     implementation("androidx.navigation:navigation-compose:2.7.7")
 }

@@ -115,6 +115,7 @@ fun AddAnimalDialog(onDismiss: () -> Unit, onSave: (Animal) -> Unit) {
     var breed by remember { mutableStateOf("") }
     var displayNumber by remember { mutableStateOf("") }
     var tagNumber by remember { mutableStateOf("") }
+    var trackerId by remember { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -127,6 +128,12 @@ fun AddAnimalDialog(onDismiss: () -> Unit, onSave: (Animal) -> Unit) {
                     OutlinedTextField(value = displayNumber, onValueChange = { displayNumber = it }, label = { Text("Número (Ej: 07)") }, modifier = Modifier.weight(1f))
                     OutlinedTextField(value = tagNumber, onValueChange = { tagNumber = it }, label = { Text("Arete") }, modifier = Modifier.weight(1f))
                 }
+                OutlinedTextField(
+                    value = trackerId, 
+                    onValueChange = { trackerId = it }, 
+                    label = { Text("Conectar Collar GPS (ID o MAC)") },
+                    leadingIcon = { Icon(Icons.Default.Add, contentDescription = null) }
+                )
             }
         },
         confirmButton = {
@@ -139,12 +146,12 @@ fun AddAnimalDialog(onDismiss: () -> Unit, onSave: (Animal) -> Unit) {
                     displayNumber = displayNumber.ifEmpty { "00" },
                     breed = breed.ifEmpty { "Cruce" },
                     ageYears = 2,
-                    trackerId = "t-${System.currentTimeMillis()}",
+                    trackerId = trackerId.ifEmpty { "Sin GPS" },
                     healthStatus = HealthStatus.HEALTHY
                 )
                 onSave(newAnimal)
             }) {
-                Text("Guardar")
+                Text("Guardar y Sincronizar")
             }
         },
         dismissButton = {
