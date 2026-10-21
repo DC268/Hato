@@ -107,8 +107,7 @@ fun SettingsScreen(viewModel: MapViewModel, onBack: () -> Unit) {
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
                     ) {
                         Text("Buscar")
-                    }
-            }
+                }
         }
     }
 }
