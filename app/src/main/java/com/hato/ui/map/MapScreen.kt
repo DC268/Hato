@@ -38,6 +38,7 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
+import org.osmdroid.views.overlay.Polyline
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 
@@ -138,6 +139,34 @@ fun MapScreen(
                             }
                         }
                         view.overlays.add(marker)
+                    }
+                }
+
+                if (viewModel.showTrail) {
+                    val animal = viewModel.selectedAnimal ?: viewModel.animals.first()
+                    val trail = viewModel.animalTrails[animal.id]
+                    if (!trail.isNullOrEmpty()) {
+                        val polyline = Polyline().apply {
+                            setPoints(trail.map { OsmGeoPoint(it.lat, it.lng) })
+                            outlinePaint.color = android.graphics.Color.argb(255, 255, 221, 181) // Naranja claro
+                            outlinePaint.strokeWidth = 8f
+                        }
+                        view.overlays.add(polyline)
+                    }
+                }
+
+                if (viewModel.showRouteGuidance) {
+                    val loc = myLocationOverlay.myLocation
+                    val animal = viewModel.selectedAnimal ?: viewModel.animals.first()
+                    val animalPos = viewModel.animalPositions[animal.id]
+                    
+                    if (loc != null && animalPos != null) {
+                        val polyline = Polyline().apply {
+                            setPoints(listOf(loc, OsmGeoPoint(animalPos.lat, animalPos.lng)))
+                            outlinePaint.color = android.graphics.Color.BLUE
+                            outlinePaint.strokeWidth = 10f
+                        }
+                        view.overlays.add(polyline)
                     }
                 }
 
@@ -421,32 +450,35 @@ fun MapScreen(
 
                                 // Botones de acción rápida
                                 Button(
-                                    onClick = { },
+                                    onClick = { viewModel.showRouteGuidance = !viewModel.showRouteGuidance },
                                     modifier = Modifier.fillMaxWidth().height(48.dp),
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.secondary,
-                                        contentColor = MaterialTheme.colorScheme.onSecondary
+                                        containerColor = if (viewModel.showRouteGuidance) MaterialTheme.colorScheme.secondaryContainer else MaterialTheme.colorScheme.secondary,
+                                        contentColor = if (viewModel.showRouteGuidance) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSecondary
                                     ),
                                     shape = RoundedCornerShape(12.dp)
                                 ) {
                                     Icon(Icons.Default.LocationOn, contentDescription = null, modifier = Modifier.size(18.dp))
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Text("CÓMO LLEGAR (RUTA RÁPIDA)", fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                                    Text(if (viewModel.showRouteGuidance) "RUTA ACTIVA" else "CÓMO LLEGAR (RUTA RÁPIDA)", fontWeight = FontWeight.Bold, fontSize = 12.sp)
                                 }
 
                                 Spacer(modifier = Modifier.height(8.dp))
 
                                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                                     OutlinedButton(
-                                        onClick = { }, 
+                                        onClick = { viewModel.showTrail = !viewModel.showTrail }, 
                                         modifier = Modifier.weight(1f).height(48.dp), 
                                         shape = RoundedCornerShape(12.dp),
-                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
+                                        colors = ButtonDefaults.outlinedButtonColors(
+                                            containerColor = if (viewModel.showTrail) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent,
+                                            contentColor = if (viewModel.showTrail) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface
+                                        )
                                     ) {
-                                        Text("VER RECORRIDO", fontSize = 10.sp, fontWeight = FontWeight.Bold)
+                                        Text(if (viewModel.showTrail) "OCULTAR RASTRO" else "VER RECORRIDO", fontSize = 10.sp, fontWeight = FontWeight.Bold)
                                     }
                                     OutlinedButton(
-                                        onClick = { }, 
+                                        onClick = { /* TODO: Mostrar dialog con ficha */ }, 
                                         modifier = Modifier.weight(1f).height(48.dp), 
                                         shape = RoundedCornerShape(12.dp),
                                         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)

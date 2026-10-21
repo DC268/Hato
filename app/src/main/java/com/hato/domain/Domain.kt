@@ -56,7 +56,7 @@ data class Animal(
     val notes: String? = null,
     val trackerId: String,
     val currentZoneId: String? = null,
-    val healthStatus: HealthStatus
+    var healthStatus: HealthStatus
 )
 
 data class Farm(

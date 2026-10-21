@@ -7,6 +7,7 @@ import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -28,7 +29,7 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
     object Map : Screen("map", "Mapa", Icons.Default.Place)
     object Zones : Screen("zones", "Potreros", Icons.Default.Home)
     object Alerts : Screen("alerts", "Alertas", Icons.Default.Notifications)
-    object Animals : Screen("animals", "Hato", Icons.Default.List)
+    object Animals : Screen("animals", "Hato", Icons.AutoMirrored.Filled.List)
     object Settings : Screen("settings", "Ajustes", Icons.Default.Settings)
 }
 
@@ -98,8 +99,8 @@ fun MainScreen(viewModel: MapViewModel) {
             }
             composable(Screen.Alerts.route) { AlertsScreen(viewModel) }
             composable(Screen.Animals.route) { AnimalsScreen(viewModel) }
-            composable(Screen.Settings.route) { SettingsScreen(viewModel) }
-            composable("profile") { com.hato.ui.screens.ProfileScreen() }
+            composable(Screen.Settings.route) { SettingsScreen(viewModel, onBack = { navController.popBackStack() }) }
+            composable("profile") { com.hato.ui.screens.ProfileScreen(onBack = { navController.popBackStack() }) }
         }
     }
 }
