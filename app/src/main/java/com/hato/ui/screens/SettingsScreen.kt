@@ -15,6 +15,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import android.Manifest
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import com.hato.ui.map.MapViewModel
 import com.hato.ui.theme.ThemeState
 
@@ -164,6 +165,32 @@ fun SettingsScreen(viewModel: MapViewModel, onBack: () -> Unit) {
                                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
                                     ) {
                                         Text("Vincular")
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Lista de dispositivos conectados
+                    if (viewModel.connectedDevices.isNotEmpty()) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text("Dispositivos Conectados", fontWeight = FontWeight.Bold, fontSize = 14.sp, color = MaterialTheme.colorScheme.primary)
+                            Spacer(modifier = Modifier.height(8.dp))
+                            viewModel.connectedDevices.forEach { deviceName ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            androidx.compose.material.icons.Icons.Default.Check,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(deviceName, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp, fontWeight = FontWeight.Bold)
                                     }
                                 }
                             }
