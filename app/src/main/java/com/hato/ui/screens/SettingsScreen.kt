@@ -22,8 +22,10 @@ import com.hato.ui.theme.ThemeState
 @Composable
 fun SettingsScreen(viewModel: MapViewModel, onBack: () -> Unit) {
     val btLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
-            viewModel.startBluetoothSimulation()
+        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            if (permissions.values.all { it }) {
+                // Permissions granted
+            }
         }
 
     Scaffold(
