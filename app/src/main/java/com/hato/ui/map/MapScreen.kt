@@ -132,11 +132,14 @@ fun MapScreen(
                     viewModel.animalPositions[animal.id]?.let { pos ->
                         val marker = Marker(view).apply {
                             position = OsmGeoPoint(pos.lat, pos.lng)
-                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                             title = "${animal.name} (${animal.displayNumber})"
-                            if (animal.id == "a-bt") {
-                                snippet = "📍 Ubicación en tiempo real de tu celular"
+                            if (animal.id.contains("bt") || animal.displayNumber == "BT") {
+                                snippet = "📍 GPS Vinculado a este animal"
                             }
+                            
+                            val isAlert = animal.healthStatus == HealthStatus.ALERT || animal.healthStatus == HealthStatus.ATTENTION
+                            icon = createCowMarker(context, animal.displayNumber, isAlert)
                         }
                         view.overlays.add(marker)
                     }
@@ -547,4 +550,28 @@ fun DrawingOverlay(onFinish: () -> Unit, onCancel: () -> Unit) {
             }
         }
     }
+}
+
+fun createCowMarker(context: android.content.Context, label: String, isAlert: Boolean): android.graphics.drawable.BitmapDrawable {
+    val size = 120
+    val bitmap = android.graphics.Bitmap.createBitmap(size, size, android.graphics.Bitmap.Config.ARGB_8888)
+    val canvas = android.graphics.Canvas(bitmap)
+    val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
+
+    // Dibujar circulo de fondo (Rojo si es alerta, Verde si está bien)
+    paint.color = if (isAlert) android.graphics.Color.parseColor("#BA1A1A") else android.graphics.Color.parseColor("#2E6B34")
+    canvas.drawCircle(size / 2f, size / 2f, size / 2f, paint)
+
+    // Dibujar Emoji de Vaca 🐮
+    paint.textSize = 55f
+    paint.textAlign = android.graphics.Paint.Align.CENTER
+    canvas.drawText("🐮", size / 2f, (size / 2f) - ((paint.descent() + paint.ascent()) / 2f) - 15f, paint)
+
+    // Dibujar el número del arete/BT
+    paint.color = android.graphics.Color.WHITE
+    paint.textSize = 28f
+    paint.typeface = android.graphics.Typeface.DEFAULT_BOLD
+    canvas.drawText(label, size / 2f, size - 15f, paint)
+
+    return android.graphics.drawable.BitmapDrawable(context.resources, bitmap)
 }
