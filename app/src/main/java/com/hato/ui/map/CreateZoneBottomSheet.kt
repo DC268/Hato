@@ -12,7 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.hato.domain.calculateAreaHa
+import com.hato.domain.model.calculateAreaHa
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.hato.domain.Animal
-import com.hato.domain.HealthStatus
+import com.hato.domain.model.Animal
+import com.hato.domain.model.HealthStatus
 import com.hato.ui.map.MapViewModel
 
 @Composable
