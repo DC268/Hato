@@ -11,16 +11,15 @@ services:
       - key: PORT
         value: 8080
       - key: HATO_DB_URL
-        sync: false
-        # Ejemplo Supabase: jdbc:postgresql://aws-0-us-west-1.pooler.supabase.com:6543/postgres?sslmode=require
+        value: jdbc:postgresql://aws-0-us-west-2.pooler.supabase.com:5432/postgres?sslmode=require
       - key: HATO_DB_USER
-        sync: false
+        value: postgres.jlzwhsalduizhuvccsxi
       - key: HATO_DB_PASSWORD
         sync: false
       - key: HATO_JWT_SECRET
         generateValue: true
       - key: HATO_INGEST_KEY
-        generateValue: true
+        value: hato-secret-ingest-key-2026
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: HATO_GPS_TCP_PORT
