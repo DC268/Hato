@@ -1,0 +1,66 @@
+server:
+  port: ${PORT:8080}
+  compression:
+    enabled: true
+
+spring:
+  application:
+    name: hato-backend
+  threads:
+    virtual:
+      enabled: true
+
+  datasource:
+    url: ${HATO_DB_URL:jdbc:postgresql://localhost:5432/hato_db}
+    username: ${HATO_DB_USER:postgres}
+    password: ${HATO_DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+    show-sql: false
+    open-in-view: false
+
+  flyway:
+    enabled: false # Usamos JPA ddl-auto y scripts V1 para compatibilidad inmediata con Supabase
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# Configuración propia de Hato
+hato:
+  jwt:
+    secret: ${HATO_JWT_SECRET:4c9b3d2f8e1a7c5b6a9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a}
+    expiration-minutes: ${HATO_JWT_EXPIRATION_MINUTES:1440} # 24 horas
+  
+  ingest:
+    key: ${HATO_INGEST_KEY:hato-secret-ingest-key-2026}
+
+  google:
+    client-id: ${GOOGLE_CLIENT_ID:982736451234-sampleclientidhato.apps.googleusercontent.com}
+
+  gps:
+    tcp-port: ${HATO_GPS_TCP_PORT:5023}
+    enabled: ${HATO_GPS_TCP_ENABLED:true}
+
+  alerts:
+    no-signal-factor: 3
+    low-battery-percent: 20
+    idle-hours: 6
+    min-accuracy-meters: 50.0
+    exit-confirmations: 2
