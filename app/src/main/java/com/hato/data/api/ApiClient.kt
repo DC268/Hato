@@ -8,8 +8,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object ApiClient {
-    // URL base por defecto del backend desplegado en Render (o local si se configura)
-    var baseUrl: String = "https://hato-backend.onrender.com/"
+    // URL base por defecto del backend desplegado en Render
+    var baseUrl: String = "https://hato-backend-gkq3.onrender.com/"
         set(value) {
             field = if (value.endsWith("/")) value else "$value/"
             retrofit = null

@@ -4,6 +4,17 @@ Plataforma integral para el rastreo y telemetría de ganado en tiempo real media
 
 ---
 
+## 🚀 Despliegue en Render (En Vivo)
+
+El backend de Spring Boot se encuentra desplegado y funcionando en la nube de Render:
+
+* 🌐 **URL Pública del Backend:** `https://hato-backend-gkq3.onrender.com`
+* 🩺 **Health Check:** [https://hato-backend-gkq3.onrender.com/actuator/health](https://hato-backend-gkq3.onrender.com/actuator/health) (Respuesta: `{"status":"UP"}`)
+* 📡 **WebSocket en Vivo:** `wss://hato-backend-gkq3.onrender.com/ws/live?farmId={id}`
+* 🗄️ **Base de Datos:** PostgreSQL en Supabase AWS (Oregon).
+
+---
+
 ## 📱 Descarga Directa del APK Android
 
 Puedes descargar el archivo APK compilado y listo para instalar en tu teléfono o tableta Android directamente desde este repositorio:
@@ -123,15 +134,14 @@ El backend está listo para desplegarse mediante Docker y `render.yaml`.
    * **Dockerfile Path:** `backend/Dockerfile`
    * **Docker Context:** `backend`
    * **Instance Type:** Free o Starter
-4. Configura las siguientes **Environment Variables**:
-   * `PORT`: `8080`
-   * `HATO_DB_URL`: `jdbc:postgresql://db.<tu-ref>.supabase.co:5432/postgres?sslmode=require`
-   * `HATO_DB_USER`: `postgres`
-   * `HATO_DB_PASSWORD`: `<tu-contrasena-supabase>`
-   * `HATO_JWT_SECRET`: `4c9b3d2f8e1a7c5b6a9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a` (o genera una aleatoria)
+4. Variables de entorno configuradas:
+   * `HATO_DB_URL`: `jdbc:postgresql://aws-0-us-west-2.pooler.supabase.com:5432/postgres?sslmode=require`
+   * `HATO_DB_USER`: `postgres.jlzwhsalduizhuvccsxi`
+   * `HATO_DB_PASSWORD`: `ZxUjFJi8Xgh.pmQ`
+   * `HATO_JWT_SECRET`: `4c9b3d2f8e1a7c5b6a9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a`
    * `HATO_INGEST_KEY`: `hato-secret-ingest-key-2026`
-   * `GOOGLE_CLIENT_ID`: Tu Web Client ID de Google Cloud Console.
-5. Guarda y presiona **Deploy**.
+   * `GOOGLE_CLIENT_ID`: `982736451234-sampleclientidhato.apps.googleusercontent.com`
+5. El servicio se encuentra **Live** en `https://hato-backend-gkq3.onrender.com`.
 
 ---
 
