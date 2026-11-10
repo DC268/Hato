@@ -72,10 +72,19 @@ fun FormContent(viewModel: MapViewModel) {
     var areaHa by remember { mutableStateOf(calculatedArea) }
     var tolerance by remember { mutableStateOf("15") }
 
+    val isNameValid = zoneName.trim().isNotEmpty()
+
     OutlinedTextField(
         value = zoneName,
         onValueChange = { zoneName = it },
-        label = { Text("Nombre del Potrero") },
+        label = { Text("Nombre del Potrero *") },
+        isError = !isNameValid,
+        supportingText = {
+            if (!isNameValid) {
+                Text("El nombre del potrero/lote es obligatorio", color = MaterialTheme.colorScheme.error)
+            }
+        },
+        singleLine = true,
         modifier = Modifier.fillMaxWidth()
     )
     Spacer(modifier = Modifier.height(8.dp))
@@ -109,13 +118,16 @@ fun FormContent(viewModel: MapViewModel) {
     
     Button(
         onClick = {
-            viewModel.saveGeofence(
-                zoneName,
-                description,
-                areaHa.toFloatOrNull() ?: 0f,
-                tolerance.toFloatOrNull() ?: 15f
-            )
+            if (isNameValid) {
+                viewModel.saveGeofence(
+                    zoneName.trim(),
+                    description,
+                    areaHa.toFloatOrNull() ?: 0f,
+                    tolerance.toFloatOrNull() ?: 15f
+                )
+            }
         },
+        enabled = isNameValid,
         modifier = Modifier
             .fillMaxWidth()
             .height(50.dp)

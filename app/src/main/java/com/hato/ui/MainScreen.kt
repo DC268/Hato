@@ -34,7 +34,10 @@ sealed class Screen(val route: String, val title: String, val icon: ImageVector)
 }
 
 @Composable
-fun MainScreen(viewModel: MapViewModel) {
+fun MainScreen(
+    viewModel: MapViewModel,
+    onLogout: () -> Unit = {}
+) {
     val navController = rememberNavController()
     val items = listOf(Screen.Map, Screen.Zones, Screen.Alerts, Screen.Animals, Screen.Settings)
 
@@ -98,8 +101,29 @@ fun MainScreen(viewModel: MapViewModel) {
                 ) 
             }
             composable(Screen.Alerts.route) { AlertsScreen(viewModel) }
-            composable(Screen.Animals.route) { AnimalsScreen(viewModel) }
-            composable(Screen.Settings.route) { SettingsScreen(viewModel, onBack = { navController.popBackStack() }) }
+            composable(Screen.Animals.route) { 
+                AnimalsScreen(
+                    viewModel = viewModel,
+                    onNavigateToMap = {
+                        navController.navigate(Screen.Map.route) {
+                            popUpTo(Screen.Map.route) { inclusive = false }
+                            launchSingleTop = true
+                        }
+                    }
+                ) 
+            }
+            composable(Screen.Settings.route) { 
+                SettingsScreen(
+                    viewModel = viewModel,
+                    onBack = { 
+                        navController.navigate(Screen.Map.route) {
+                            popUpTo(Screen.Map.route) { inclusive = false }
+                            launchSingleTop = true
+                        }
+                    },
+                    onLogout = onLogout
+                ) 
+            }
             composable("profile") { com.hato.ui.screens.ProfileScreen(onBack = { navController.popBackStack() }) }
         }
     }

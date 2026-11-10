@@ -30,10 +30,30 @@ class MainActivity : ComponentActivity() {
                     var isLoggedIn by remember { mutableStateOf(sessionManager.isLoggedIn()) }
                     val viewModel = remember { MapViewModel() }
 
+                    LaunchedEffect(isLoggedIn) {
+                        if (isLoggedIn) {
+                            val u = sessionManager.getUser()
+                            viewModel.loadUserData(u?.id, u?.email)
+                        }
+                    }
+
                     if (isLoggedIn) {
-                        MainScreen(viewModel)
+                        MainScreen(
+                            viewModel = viewModel,
+                            onLogout = {
+                                sessionManager.clearSession()
+                                com.hato.data.api.ApiClient.authToken = null
+                                isLoggedIn = false
+                            }
+                        )
                     } else {
-                        LoginScreen(onLoginSuccess = { isLoggedIn = true })
+                        LoginScreen(
+                            onLoginSuccess = {
+                                val u = sessionManager.getUser()
+                                viewModel.loadUserData(u?.id, u?.email)
+                                isLoggedIn = true
+                            }
+                        )
                     }
                 }
             }

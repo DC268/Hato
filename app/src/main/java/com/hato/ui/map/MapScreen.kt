@@ -77,6 +77,7 @@ fun MapScreen(
         Configuration.getInstance().userAgentValue = context.packageName
         mapView.setTileSource(TileSourceFactory.MAPNIK)
         mapView.setMultiTouchControls(true)
+        mapView.zoomController.setVisibility(org.osmdroid.views.CustomZoomButtonsController.Visibility.NEVER)
         mapView.controller.setZoom(16.5)
 
         val mapEventsReceiver = object : MapEventsReceiver {
@@ -313,14 +314,12 @@ fun MapScreen(
             }
         }
 
-        // 4. BOTONES FLOTANTES DE MAPA (Centrar en mi ubicación / Centrar en animal vinculado)
-        Column(
+        // 4. BOTÓN ÚNICO DE ACERCAMIENTO Y CENTRADO INTELIGENTE
+        Box(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .padding(end = 16.dp, bottom = 120.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(end = 16.dp, bottom = 120.dp)
         ) {
-            // Centrar en Dispositivo Seleccionado
             FloatingActionButton(
                 onClick = {
                     val animal = viewModel.selectedAnimal ?: viewModel.animals.firstOrNull()
@@ -328,31 +327,22 @@ fun MapScreen(
                     if (pos != null) {
                         mapView.controller.animateTo(OsmGeoPoint(pos.lat, pos.lng))
                         mapView.controller.setZoom(18.0)
+                    } else {
+                        val myLoc = myLocationOverlay.myLocation
+                        if (myLoc != null) {
+                            mapView.controller.animateTo(myLoc)
+                            mapView.controller.setZoom(17.5)
+                        } else {
+                            mapView.controller.setZoom(mapView.zoomLevelDouble + 1.0)
+                        }
                     }
                 },
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
                 shape = CircleShape,
-                modifier = Modifier.size(48.dp)
+                modifier = Modifier.size(52.dp)
             ) {
-                Icon(Icons.Default.Place, contentDescription = "Centrar en animal")
-            }
-
-            // Centrar en Mi Ubicación
-            FloatingActionButton(
-                onClick = {
-                    val myLoc = myLocationOverlay.myLocation
-                    if (myLoc != null) {
-                        mapView.controller.animateTo(myLoc)
-                        mapView.controller.setZoom(17.0)
-                    }
-                },
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.primary,
-                shape = CircleShape,
-                modifier = Modifier.size(48.dp)
-            ) {
-                Icon(Icons.Default.LocationOn, contentDescription = "Mi ubicación")
+                Icon(Icons.Default.LocationOn, contentDescription = "Acercar y Centrar")
             }
         }
 

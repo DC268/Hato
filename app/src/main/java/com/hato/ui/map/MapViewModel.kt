@@ -45,11 +45,10 @@ class MapViewModel : ViewModel() {
     )
 
     // Animales en el Hato
-    val animals = mutableStateListOf(
-        Animal("a-03", "farm-01", "Vaca Pinta", "#0342", "03", "Holstein", 4, 450f, null, null, "TRK-0001", "zone-1", HealthStatus.ALERT),
-        Animal("a-21", "farm-01", "Toro Brahman", "#0343", "21", "Brahman", 5, 600f, null, null, "TRK-0002", "zone-1", HealthStatus.HEALTHY),
-        Animal("a-12", "farm-01", "Vaca Manchas", "#0344", "12", "Jersey", 3, 400f, null, null, "TRK-0003", "zone-1", HealthStatus.HEALTHY)
-    )
+    val animals = mutableStateListOf<Animal>()
+
+    var activeUserId by mutableStateOf<String?>(null)
+    var activeUserEmail by mutableStateOf<String?>(null)
 
     // Posiciones en tiempo real (ID de animal -> GeoPoint)
     val animalPositions = mutableStateMapOf<String, GeoPoint>()
@@ -79,41 +78,62 @@ class MapViewModel : ViewModel() {
     // Cliente WebSocket para tiempo real desde el backend
     private var liveSocketManager: LiveSocketManager? = null
 
-    init {
-        // Coordenadas iniciales por defecto
-        animalPositions["a-03"] = GeoPoint(10.4665, -84.6455)
-        animalPositions["a-21"] = GeoPoint(10.4650, -84.6440)
-        animalPositions["a-12"] = GeoPoint(10.4670, -84.6460)
+    fun loadUserData(userId: String?, email: String?) {
+        activeUserId = userId
+        activeUserEmail = email
 
-        animalTrails["a-03"] = listOf(
-            GeoPoint(10.4670, -84.6450),
-            GeoPoint(10.4668, -84.6452),
-            GeoPoint(10.4665, -84.6455)
-        )
-        animalTrails["a-21"] = listOf(GeoPoint(10.4650, -84.6440))
-        animalTrails["a-12"] = listOf(GeoPoint(10.4670, -84.6460))
+        animals.clear()
+        animalPositions.clear()
+        animalTrails.clear()
+        savedZones.clear()
 
-        selectedAnimal = animals.firstOrNull()
-
-        // Geocerca demo inicial para que el ganado tenga potrero definido
-        val defaultPoints = listOf(
-            GeoPoint(10.4680, -84.6470),
-            GeoPoint(10.4680, -84.6430),
-            GeoPoint(10.4640, -84.6430),
-            GeoPoint(10.4640, -84.6470)
-        )
-        savedZones.add(
-            PolygonGeofence(
-                id = "zone-default-1",
-                farmId = "farm-01",
-                name = "Potrero Principal",
-                toleranceMeters = 15f,
-                points = defaultPoints,
-                active = true,
-                description = "Zona de pastoreo rotativo norte",
-                areaHa = calculateAreaHa(defaultPoints)
+        // Si es la cuenta principal de demostración / Administrador
+        if (email == "admin@hato.com" || userId == "u-admin-01") {
+            animals.addAll(
+                listOf(
+                    Animal("a-03", "farm-01", "Vaca Pinta", "#0342", "03", "Holstein", 4, 450f, null, null, "TRK-0001", "zone-1", HealthStatus.ALERT),
+                    Animal("a-21", "farm-01", "Toro Brahman", "#0343", "21", "Brahman", 5, 600f, null, null, "TRK-0002", "zone-1", HealthStatus.HEALTHY),
+                    Animal("a-12", "farm-01", "Vaca Manchas", "#0344", "12", "Jersey", 3, 400f, null, null, "TRK-0003", "zone-1", HealthStatus.HEALTHY)
+                )
             )
-        )
+            animalPositions["a-03"] = GeoPoint(10.4665, -84.6455)
+            animalPositions["a-21"] = GeoPoint(10.4650, -84.6440)
+            animalPositions["a-12"] = GeoPoint(10.4670, -84.6460)
+
+            animalTrails["a-03"] = listOf(
+                GeoPoint(10.4670, -84.6450),
+                GeoPoint(10.4668, -84.6452),
+                GeoPoint(10.4665, -84.6455)
+            )
+            animalTrails["a-21"] = listOf(GeoPoint(10.4650, -84.6440))
+            animalTrails["a-12"] = listOf(GeoPoint(10.4670, -84.6460))
+
+            val defaultPoints = listOf(
+                GeoPoint(10.4680, -84.6470),
+                GeoPoint(10.4680, -84.6430),
+                GeoPoint(10.4640, -84.6430),
+                GeoPoint(10.4640, -84.6470)
+            )
+            savedZones.add(
+                PolygonGeofence(
+                    id = "zone-default-1",
+                    farmId = "farm-01",
+                    name = "Potrero Principal",
+                    toleranceMeters = 15f,
+                    points = defaultPoints,
+                    active = true,
+                    description = "Zona de pastoreo rotativo norte",
+                    areaHa = calculateAreaHa(defaultPoints)
+                )
+            )
+        }
+        selectedAnimal = animals.firstOrNull()
+        mapUpdateTrigger++
+    }
+
+    init {
+        // Carga inicial por defecto
+        loadUserData("u-admin-01", "admin@hato.com")
 
         // Monitoreo de inactividad
         viewModelScope.launch {
@@ -323,10 +343,12 @@ class MapViewModel : ViewModel() {
     }
 
     fun saveGeofence(name: String, description: String, area: Float, tolerance: Float) {
+        if (name.trim().isBlank()) return // Restringe crear lote sin nombre
+
         val newZone = PolygonGeofence(
             id = "zone-${System.currentTimeMillis()}",
             farmId = currentFarm.id,
-            name = name.ifBlank { "Potrero Nuevo" },
+            name = name.trim(),
             toleranceMeters = tolerance,
             points = currentDrawingPoints.toList(),
             active = true,
@@ -336,6 +358,40 @@ class MapViewModel : ViewModel() {
         savedZones.add(newZone)
         currentDrawingPoints.clear()
         createZoneState = CreateZoneState.HIDDEN
+        mapUpdateTrigger++
+    }
+
+    fun editGeofence(updated: Geofence) {
+        val index = savedZones.indexOfFirst { it.id == updated.id }
+        if (index != -1) {
+            savedZones[index] = updated
+            mapUpdateTrigger++
+        }
+    }
+
+    fun deleteGeofence(id: String) {
+        savedZones.removeAll { it.id == id }
+        mapUpdateTrigger++
+    }
+
+    fun editAnimal(updated: Animal) {
+        val index = animals.indexOfFirst { it.id == updated.id }
+        if (index != -1) {
+            animals[index] = updated
+            if (selectedAnimal?.id == updated.id) {
+                selectedAnimal = updated
+            }
+            mapUpdateTrigger++
+        }
+    }
+
+    fun deleteAnimal(id: String) {
+        animals.removeAll { it.id == id }
+        animalPositions.remove(id)
+        animalTrails.remove(id)
+        if (selectedAnimal?.id == id) {
+            selectedAnimal = animals.firstOrNull()
+        }
         mapUpdateTrigger++
     }
 
