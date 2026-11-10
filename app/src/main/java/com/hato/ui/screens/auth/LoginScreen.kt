@@ -51,8 +51,8 @@ fun LoginScreen(
 
     var isRegisterMode by remember { mutableStateOf(false) }
     var name by remember { mutableStateOf("") }
-    var email by remember { mutableStateOf("admin@hato.com") }
-    var password by remember { mutableStateOf("admin123") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
