@@ -11,9 +11,9 @@ spring:
       enabled: true
 
   datasource:
-    url: ${HATO_DB_URL:jdbc:postgresql://localhost:5432/hato_db}
-    username: ${HATO_DB_USER:postgres}
-    password: ${HATO_DB_PASSWORD:postgres}
+    url: ${HATO_DB_URL:jdbc:postgresql://aws-0-us-west-2.pooler.supabase.com:5432/postgres?sslmode=require}
+    username: ${HATO_DB_USER:postgres.jlzwhsalduizhuvccsxi}
+    password: ${HATO_DB_PASSWORD:ZxUjFJi8Xgh.pmQ}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10
@@ -25,7 +25,6 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
     show-sql: false
     open-in-view: false
