@@ -3,7 +3,6 @@ package com.hato.ui
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Settings
@@ -13,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -24,6 +24,7 @@ import com.hato.ui.screens.AlertsScreen
 import com.hato.ui.screens.AnimalsScreen
 import com.hato.ui.screens.SettingsScreen
 import com.hato.ui.screens.ZonesScreen
+import com.hato.ui.theme.*
 
 sealed class Screen(val route: String, val title: String, val icon: ImageVector) {
     object Map : Screen("map", "Mapa", Icons.Default.Place)
@@ -44,17 +45,19 @@ fun MainScreen(
     Scaffold(
         bottomBar = {
             NavigationBar(
-                containerColor = MaterialTheme.colorScheme.background,
-                contentColor = MaterialTheme.colorScheme.onSurface
+                containerColor = SurfaceDark,
+                contentColor = OnSurface,
+                tonalElevation = 8.dp
             ) {
                 val navBackStackEntry by navController.currentBackStackEntryAsState()
                 val currentRoute = navBackStackEntry?.destination?.route
-                
+
                 items.forEach { screen ->
+                    val isSelected = currentRoute == screen.route
                     NavigationBarItem(
                         icon = { Icon(screen.icon, contentDescription = screen.title) },
-                        label = { Text(screen.title) },
-                        selected = currentRoute == screen.route,
+                        label = { Text(screen.title, style = MaterialTheme.typography.labelSmall) },
+                        selected = isSelected,
                         onClick = {
                             navController.navigate(screen.route) {
                                 popUpTo(navController.graph.startDestinationId) {
@@ -65,11 +68,11 @@ fun MainScreen(
                             }
                         },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                            selectedTextColor = MaterialTheme.colorScheme.primary,
-                            indicatorColor = MaterialTheme.colorScheme.primaryContainer,
-                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+                            selectedIconColor = Primary,
+                            selectedTextColor = Primary,
+                            indicatorColor = SurfaceContainerHigh,
+                            unselectedIconColor = OnSurfaceVariant,
+                            unselectedTextColor = OnSurfaceVariant
                         )
                     )
                 }
@@ -124,7 +127,6 @@ fun MainScreen(
                     onLogout = onLogout
                 ) 
             }
-            composable("profile") { com.hato.ui.screens.ProfileScreen(onBack = { navController.popBackStack() }) }
         }
     }
 }

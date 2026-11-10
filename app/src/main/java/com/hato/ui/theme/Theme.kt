@@ -7,49 +7,60 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 private val DarkColorScheme = darkColorScheme(
-    primary = PrimaryGreen,
-    primaryContainer = PrimaryGreenFixed,
-    onPrimary = TextWhite,
-    onPrimaryContainer = OnPrimaryFixed,
-    secondary = SecondaryBlue,
-    onSecondary = TextWhite,
-    secondaryContainer = SecondaryBlueContainer,
+    primary = Primary,
+    onPrimary = OnPrimary,
+    primaryContainer = PrimaryContainer,
+    onPrimaryContainer = OnPrimaryContainer,
+    inversePrimary = InversePrimary,
+
+    secondary = Secondary,
+    onSecondary = OnSecondary,
+    secondaryContainer = SecondaryContainer,
     onSecondaryContainer = OnSecondaryContainer,
-    error = ErrorRed,
-    onError = TextWhite,
+
+    tertiary = Tertiary,
+    onTertiary = OnTertiary,
+    tertiaryContainer = TertiaryContainer,
+    onTertiaryContainer = OnTertiaryContainer,
+
+    error = Error,
+    onError = OnError,
     errorContainer = ErrorContainer,
     onErrorContainer = OnErrorContainer,
-    background = BackgroundDark,
+
+    background = SurfaceDark,
+    onBackground = OnSurface,
+
     surface = SurfaceDark,
-    surfaceVariant = SurfaceVariantDark,
-    onBackground = TextWhite,
-    onSurface = TextWhite,
-    onSurfaceVariant = TextLightGray,
-    outline = OutlineVariant,
+    onSurface = OnSurface,
+    surfaceVariant = SurfaceContainerHigh,
+    onSurfaceVariant = OnSurfaceVariant,
+
+    surfaceContainerLowest = SurfaceContainerLowest,
+    surfaceContainerLow = SurfaceContainerLow,
+    surfaceContainer = SurfaceContainer,
+    surfaceContainerHigh = SurfaceContainerHigh,
+    surfaceContainerHighest = SurfaceContainerHighest,
+
+    inverseSurface = InverseSurface,
+    inverseOnSurface = InverseOnSurface,
+
+    outline = Outline,
     outlineVariant = OutlineVariant
 )
 
-private val LightColorScheme = lightColorScheme(
-    primary = PrimaryGreen,
-    primaryContainer = PrimaryGreenFixed,
-    onPrimary = TextWhite,
-    onPrimaryContainer = OnPrimaryFixed,
-    secondary = SecondaryBlue,
-    onSecondary = TextWhite,
-    secondaryContainer = SecondaryBlueContainer,
-    onSecondaryContainer = OnSecondaryContainer,
-    error = ErrorRed,
-    onError = TextWhite,
-    errorContainer = ErrorContainer,
-    onErrorContainer = OnErrorContainer,
-    background = Color(0xFFF8FAF3),
-    surface = Color(0xFFF8FAF3),
-    surfaceVariant = Color(0xFFE2E3DD),
-    onBackground = Color(0xFF191C18),
-    onSurface = Color(0xFF191C18),
-    onSurfaceVariant = Color(0xFF42493F),
-    outline = Color(0xFF72796F),
-    outlineVariant = Color(0xFFC2C8BD)
+private val LightColorScheme = darkColorScheme( // Para campo y alta precisión, se mantiene la paleta ejecutiva de alto contraste
+    primary = Primary,
+    onPrimary = OnPrimary,
+    primaryContainer = PrimaryContainer,
+    onPrimaryContainer = OnPrimaryContainer,
+    secondary = Secondary,
+    background = SurfaceDark,
+    surface = SurfaceDark,
+    onSurface = OnSurface,
+    surfaceVariant = SurfaceContainerHigh,
+    outline = Outline,
+    outlineVariant = OutlineVariant
 )
 
 @Composable
@@ -58,6 +69,7 @@ fun HatoTheme(darkTheme: Boolean = true, content: @Composable () -> Unit) {
     
     MaterialTheme(
         colorScheme = colorScheme,
+        typography = HatoTypography,
         content = content
     )
 }

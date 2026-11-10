@@ -113,7 +113,7 @@ fun MapScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().background(Color(0xFF2E312D))) {
+    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
 
         // 1. EL MAPA (AL FONDO - OPENSTREETMAP LIBRE)
         AndroidView(
@@ -283,7 +283,7 @@ fun MapScreen(
                                 Box(
                                     modifier = Modifier
                                         .size(8.dp)
-                                        .background(Color(0xFF00C853), CircleShape)
+                                        .background(MaterialTheme.colorScheme.primary, CircleShape)
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(

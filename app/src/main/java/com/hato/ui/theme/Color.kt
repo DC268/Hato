@@ -2,26 +2,58 @@ package com.hato.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Paleta base
-val PrimaryGreen = Color(0xFF2E6B34)
-val PrimaryGreenFixed = Color(0xFFA8F5A6)
-val OnPrimaryFixed = Color(0xFF002106)
+// Sistema de Color "Verdant Precision" para Hato Ganadería Digital
+// Tonos Deep Forest Slate, Esmeralda Luminous y Acabados Técnicos
 
-val SecondaryBlue = Color(0xFF156589)
-val SecondaryBlueContainer = Color(0xFFC0E8FF)
-val OnSecondaryContainer = Color(0xFF001E2B)
+val SurfaceDark = Color(0xFF0D1512)
+val SurfaceDimDark = Color(0xFF0D1512)
+val SurfaceBrightDark = Color(0xFF333B37)
 
-val ErrorRed = Color(0xFFBA1A1A)
-val ErrorContainer = Color(0xFFFFDAD6)
-val OnErrorContainer = Color(0xFF410002)
+val SurfaceContainerLowest = Color(0xFF08100D)
+val SurfaceContainerLow = Color(0xFF151D1A)
+val SurfaceContainer = Color(0xFF19211E)
+val SurfaceContainerHigh = Color(0xFF232C28)
+val SurfaceContainerHighest = Color(0xFF2E3733)
 
-val BackgroundDark = Color(0xFF191C18)
-val SurfaceDark = Color(0xFF2E312D)
-val SurfaceVariantDark = Color(0xFF42493F)
+val OnSurface = Color(0xFFDCE5DF)
+val OnSurfaceVariant = Color(0xFFBBCABF)
+val InverseSurface = Color(0xFFDCE5DF)
+val InverseOnSurface = Color(0xFF2A322F)
 
-// Mejoras de contraste solicitadas
-val TextWhite = Color(0xFFFFFFFF)
-val TextLightGray = Color(0xFFE2E3DD)
-val TextDimGray = Color(0xFFAAB0A6)
-val TextGreen = Color(0xFFA8F5A6) // Para textos sobre botones oscuros
-val OutlineVariant = Color(0xFF72796F)
+val Outline = Color(0xFF86948A)
+val OutlineVariant = Color(0xFF3C4A42)
+
+val Primary = Color(0xFF4EDEA3)
+val OnPrimary = Color(0xFF003824)
+val PrimaryContainer = Color(0xFF10B981)
+val OnPrimaryContainer = Color(0xFF00422B)
+val InversePrimary = Color(0xFF006C49)
+
+val Secondary = Color(0xFF68DBA9)
+val OnSecondary = Color(0xFF003825)
+val SecondaryContainer = Color(0xFF25A475)
+val OnSecondaryContainer = Color(0xFF00311F)
+
+val Tertiary = Color(0xFF45DFA4)
+val OnTertiary = Color(0xFF003825)
+val TertiaryContainer = Color(0xFF00B982)
+val OnTertiaryContainer = Color(0xFF00422C)
+
+val Error = Color(0xFFFFB4AB)
+val OnError = Color(0xFF690005)
+val ErrorContainer = Color(0xFF93000A)
+val OnErrorContainer = Color(0xFFFFDAD6)
+
+// Aliases para compatibilidad con código existente
+val PrimaryGreen = Primary
+val PrimaryGreenFixed = PrimaryContainer
+val OnPrimaryFixed = OnPrimary
+val SecondaryBlue = Secondary
+val SecondaryBlueContainer = SecondaryContainer
+val BackgroundDark = SurfaceDark
+val SurfaceVariantDark = SurfaceContainerHighest
+val TextWhite = OnSurface
+val TextLightGray = OnSurfaceVariant
+val TextDimGray = Outline
+val TextGreen = Primary
+val ErrorRed = Error

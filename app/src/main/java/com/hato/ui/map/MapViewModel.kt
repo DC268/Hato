@@ -87,53 +87,15 @@ class MapViewModel : ViewModel() {
         animalTrails.clear()
         savedZones.clear()
 
-        // Si es la cuenta principal de demostración / Administrador
-        if (email == "admin@hato.com" || userId == "u-admin-01") {
-            animals.addAll(
-                listOf(
-                    Animal("a-03", "farm-01", "Vaca Pinta", "#0342", "03", "Holstein", 4, 450f, null, null, "TRK-0001", "zone-1", HealthStatus.ALERT),
-                    Animal("a-21", "farm-01", "Toro Brahman", "#0343", "21", "Brahman", 5, 600f, null, null, "TRK-0002", "zone-1", HealthStatus.HEALTHY),
-                    Animal("a-12", "farm-01", "Vaca Manchas", "#0344", "12", "Jersey", 3, 400f, null, null, "TRK-0003", "zone-1", HealthStatus.HEALTHY)
-                )
-            )
-            animalPositions["a-03"] = GeoPoint(10.4665, -84.6455)
-            animalPositions["a-21"] = GeoPoint(10.4650, -84.6440)
-            animalPositions["a-12"] = GeoPoint(10.4670, -84.6460)
-
-            animalTrails["a-03"] = listOf(
-                GeoPoint(10.4670, -84.6450),
-                GeoPoint(10.4668, -84.6452),
-                GeoPoint(10.4665, -84.6455)
-            )
-            animalTrails["a-21"] = listOf(GeoPoint(10.4650, -84.6440))
-            animalTrails["a-12"] = listOf(GeoPoint(10.4670, -84.6460))
-
-            val defaultPoints = listOf(
-                GeoPoint(10.4680, -84.6470),
-                GeoPoint(10.4680, -84.6430),
-                GeoPoint(10.4640, -84.6430),
-                GeoPoint(10.4640, -84.6470)
-            )
-            savedZones.add(
-                PolygonGeofence(
-                    id = "zone-default-1",
-                    farmId = "farm-01",
-                    name = "Potrero Principal",
-                    toleranceMeters = 15f,
-                    points = defaultPoints,
-                    active = true,
-                    description = "Zona de pastoreo rotativo norte",
-                    areaHa = calculateAreaHa(defaultPoints)
-                )
-            )
-        }
-        selectedAnimal = animals.firstOrNull()
+        // No se crean datos de referencia o simulados por defecto.
+        // Solo se mostrarán las entidades reales creadas o registradas por el usuario.
+        selectedAnimal = null
         mapUpdateTrigger++
     }
 
     init {
-        // Carga inicial por defecto
-        loadUserData("u-admin-01", "admin@hato.com")
+        // Inicialización limpia sin datos de referencia
+        loadUserData(null, null)
 
         // Monitoreo de inactividad
         viewModelScope.launch {
