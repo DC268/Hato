@@ -62,7 +62,7 @@ public class AuthService {
                 .orElseThrow(() -> new ApiException("INVALID_CREDENTIALS", "Credenciales incorrectas", HttpStatus.UNAUTHORIZED));
 
         if (user.getPasswordHash() == null || !passwordEncoder.matches(req.password(), user.getPasswordHash())) {
-            throw new ApiException("INVALID_CREDENTIALS", "Credenciales incorrectas", HttpStatus.UNAUTHORIZED));
+            throw new ApiException("INVALID_CREDENTIALS", "Credenciales incorrectas", HttpStatus.UNAUTHORIZED);
         }
 
         String token = jwtTokenProvider.generateToken(user.getId(), user.getEmail(), user.getRole().name());

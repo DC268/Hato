@@ -1,17 +1,11 @@
 package com.hato.infrastructure.persistence.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.Instant;
 
 @Entity
 @Table(name = "zones")
-@Getter
-@Setter
-@NoArgsConstructor
 public class ZoneEntity {
 
     @Id
@@ -53,4 +47,111 @@ public class ZoneEntity {
 
     @Column(name = "created_at")
     private Instant createdAt = Instant.now();
+
+    public ZoneEntity() {
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getFarmId() {
+        return farmId;
+    }
+
+    public void setFarmId(String farmId) {
+        this.farmId = farmId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public String getPointsJson() {
+        return pointsJson;
+    }
+
+    public void setPointsJson(String pointsJson) {
+        this.pointsJson = pointsJson;
+    }
+
+    public Double getCenterLat() {
+        return centerLat;
+    }
+
+    public void setCenterLat(Double centerLat) {
+        this.centerLat = centerLat;
+    }
+
+    public Double getCenterLng() {
+        return centerLng;
+    }
+
+    public void setCenterLng(Double centerLng) {
+        this.centerLng = centerLng;
+    }
+
+    public Double getRadiusMeters() {
+        return radiusMeters;
+    }
+
+    public void setRadiusMeters(Double radiusMeters) {
+        this.radiusMeters = radiusMeters;
+    }
+
+    public float getToleranceMeters() {
+        return toleranceMeters;
+    }
+
+    public void setToleranceMeters(float toleranceMeters) {
+        this.toleranceMeters = toleranceMeters;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public float getAreaHa() {
+        return areaHa;
+    }
+
+    public void setAreaHa(float areaHa) {
+        this.areaHa = areaHa;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
 }

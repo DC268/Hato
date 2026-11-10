@@ -2,9 +2,6 @@ package com.hato.infrastructure.persistence.entity;
 
 import com.hato.domain.model.Role;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.Instant;
 
@@ -12,9 +9,6 @@ import java.time.Instant;
 @Table(name = "memberships", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"user_id", "farm_id"})
 })
-@Getter
-@Setter
-@NoArgsConstructor
 public class MembershipEntity {
 
     @Id
@@ -33,4 +27,47 @@ public class MembershipEntity {
 
     @Column(name = "created_at")
     private Instant createdAt = Instant.now();
+
+    public MembershipEntity() {
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+
+    public String getFarmId() {
+        return farmId;
+    }
+
+    public void setFarmId(String farmId) {
+        this.farmId = farmId;
+    }
+
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
+    }
 }

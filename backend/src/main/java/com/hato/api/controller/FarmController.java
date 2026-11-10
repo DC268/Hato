@@ -26,14 +26,14 @@ public class FarmController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Farm> getFarmById(@Path("id") String id) {
+    public ResponseEntity<Farm> getFarmById(@PathVariable("id") String id) {
         return farmService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping("/{id}/animals")
-    public ResponseEntity<?> getFarmAnimals(@Path("id") String id) {
+    public ResponseEntity<?> getFarmAnimals(@PathVariable("id") String id) {
         return ResponseEntity.ok(animalService.findByFarm(id));
     }
 }

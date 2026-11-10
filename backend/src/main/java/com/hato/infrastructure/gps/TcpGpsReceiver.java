@@ -37,13 +37,13 @@ public class TcpGpsReceiver implements GpsReceiver {
     @EventListener(ApplicationReadyEvent.class)
     public void onStart() {
         if (enabled) {
-            Thread.ofVirtual().start(() -> {
+            new Thread(() -> {
                 try {
                     start();
                 } catch (IOException e) {
                     log.error("Error iniciando servidor TCP de GPS en puerto {}", port, e);
                 }
-            });
+            }, "gps-tcp-listener").start();
         }
     }
 
@@ -51,7 +51,7 @@ public class TcpGpsReceiver implements GpsReceiver {
     public void start() throws IOException {
         running = true;
         serverSocket = new ServerSocket(port);
-        pool = Executors.newVirtualThreadPerTaskExecutor();
+        pool = Executors.newCachedThreadPool();
         log.info("Servidor TCP para collares GPS iniciado en el puerto {}", port);
 
         while (running) {

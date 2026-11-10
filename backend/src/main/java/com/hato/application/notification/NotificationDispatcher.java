@@ -17,7 +17,7 @@ public class NotificationDispatcher {
     private static final Logger log = LoggerFactory.getLogger(NotificationDispatcher.class);
 
     private final List<Notifier> notifiers;
-    private final ExecutorService pool = Executors.newVirtualThreadPerTaskExecutor();
+    private final ExecutorService pool = Executors.newCachedThreadPool();
 
     public NotificationDispatcher(List<Notifier> notifiers) {
         this.notifiers = notifiers != null ? notifiers : List.of();
