@@ -576,17 +576,17 @@ fun MapScreen(
 
                                     Spacer(modifier = Modifier.height(10.dp))
 
-                                    // Métricas de Telemetría y Batería
+                                    val weight = selectedAnimal.weightKg ?: 450f
+                                    val estCop = (weight * 9000L).toLong()
+
+                                    // Métricas de Telemetría, Batería, Peso y Estimado Comercial Colombia
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
                                         horizontalArrangement = Arrangement.SpaceBetween
                                     ) {
                                         TelemetryItem("Batería", "$battery% ⚡")
-                                        TelemetryItem("Velocidad", "1.2 km/h")
-                                        TelemetryItem(
-                                            "Coordenadas",
-                                            pos?.let { "${String.format("%.4f", it.lat)}, ${String.format("%.4f", it.lng)}" } ?: "Buscando..."
-                                        )
+                                        TelemetryItem("Peso", "${weight.toInt()} kg")
+                                        TelemetryItem("Est. Venta COP", "$${estCop / 1000000}.${(estCop % 1000000) / 100000}M")
                                     }
 
                                     Spacer(modifier = Modifier.height(10.dp))

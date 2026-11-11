@@ -34,6 +34,21 @@ import com.hato.domain.model.Animal
 import com.hato.domain.model.HealthStatus
 import com.hato.ui.map.MapViewModel
 import com.hato.ui.theme.*
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
+
+// Constante de referencia de venta de ganado en pie en Colombia (Feria ganadera / Subastar / Fedegán)
+const val ESTIMATED_COP_PER_KG = 9000L
+
+fun formatCopCurrency(amount: Long): String {
+    val symbols = DecimalFormatSymbols(Locale("es", "CO")).apply {
+        groupingSeparator = '.'
+        decimalSeparator = ','
+    }
+    val formatter = DecimalFormat("$#,### COP", symbols)
+    return formatter.format(amount)
+}
 
 val COMMON_CATTLE_BREEDS = listOf(
     "Brahman",
@@ -81,6 +96,9 @@ fun AnimalsScreen(
 
     // Modal de selección de acción: Editar vs Ubicar en el Mapa
     selectedForAction?.let { animal ->
+        val weight = animal.weightKg ?: 450f
+        val estValueCop = (weight * ESTIMATED_COP_PER_KG).toLong()
+
         AlertDialog(
             onDismissRequest = { selectedForAction = null },
             icon = { Icon(Icons.Default.Place, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
@@ -95,17 +113,42 @@ fun AnimalsScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        "Arete: #${animal.tagNumber} • Raza: ${animal.breed}",
+                        "Arete: #${animal.tagNumber} • Raza: ${animal.breed} • Edad: ${animal.ageYears} años",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
+                    Text(
+                        "Peso en pie: ${weight.toInt()} kg",
+                        style = MaterialTheme.typography.bodyMedium,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Surface(
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Column(modifier = Modifier.padding(8.dp)) {
+                            Text(
+                                "Valor Estimado de Venta (Colombia):",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                text = formatCopCurrency(estValueCop),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
                     Text(
                         "Collar / Dispositivo: ${animal.trackerId}",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(6.dp))
+                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         "Selecciona la acción a realizar:",
                         style = MaterialTheme.typography.bodySmall,
@@ -394,6 +437,8 @@ fun AnimalsScreen(
                     items(filteredAnimals, key = { it.id }) { animal ->
                         val isAlert = animal.healthStatus == HealthStatus.ALERT
                         val battery = viewModel.getBatteryLevel(animal.id)
+                        val weight = animal.weightKg ?: 450f
+                        val estCop = (weight * ESTIMATED_COP_PER_KG).toLong()
 
                         Card(
                             modifier = Modifier
@@ -474,11 +519,11 @@ fun AnimalsScreen(
                                             modifier = Modifier.padding(top = 2.dp)
                                         )
 
-                                        // Metadatos
+                                        // Metadatos principales (Arete, Edad, Sincronización)
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(top = 8.dp),
+                                                .padding(top = 6.dp),
                                             verticalAlignment = Alignment.CenterVertically,
                                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                                         ) {
@@ -512,6 +557,35 @@ fun AnimalsScreen(
                                                 color = MaterialTheme.colorScheme.primary,
                                                 fontWeight = FontWeight.Medium
                                             )
+                                        }
+
+                                        // Fila con Peso en pie y Estimado de Venta en Colombia
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(top = 6.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.SpaceBetween
+                                        ) {
+                                            Text(
+                                                text = "Peso: ${weight.toInt()} kg",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+
+                                            Surface(
+                                                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f),
+                                                shape = RoundedCornerShape(6.dp)
+                                            ) {
+                                                Text(
+                                                    text = "Est. Venta: ${formatCopCurrency(estCop)}",
+                                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -576,6 +650,7 @@ fun EditAnimalDialog(
     var tagNumber by remember { mutableStateOf(animal.tagNumber) }
     var trackerId by remember { mutableStateOf(animal.trackerId) }
     var ageText by remember { mutableStateOf(animal.ageYears.toString()) }
+    var weightText by remember { mutableStateOf(animal.weightKg?.toInt()?.toString() ?: "450") }
 
     var isBreedDropdownExpanded by remember { mutableStateOf(false) }
 
@@ -625,25 +700,25 @@ fun EditAnimalDialog(
                     }
                 }
 
-                // IDENTIFICADORES: ACEPTA SOLO NÚMEROS
+                // IDENTIFICADORES: TECLADO NUMÉRICO Y FILTRADO AUTOMÁTICO
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = displayNumber,
                         onValueChange = { input -> displayNumber = input.filter { it.isDigit() } },
-                        label = { Text("Número (Solo dígitos)") },
+                        label = { Text("Número (Ej: 07)") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
                     OutlinedTextField(
                         value = tagNumber,
                         onValueChange = { input -> tagNumber = input.filter { it.isDigit() } },
-                        label = { Text("Arete (Solo dígitos)") },
+                        label = { Text("Arete (Ej: 0342)") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
                 }
 
-                // EDAD: ACEPTA SOLO NÚMEROS ENTEROS
+                // EDAD Y PESO EN PIE
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = ageText,
@@ -653,12 +728,55 @@ fun EditAnimalDialog(
                         modifier = Modifier.weight(1f)
                     )
                     OutlinedTextField(
-                        value = trackerId,
-                        onValueChange = { trackerId = it },
-                        label = { Text("Collar / Tracker") },
+                        value = weightText,
+                        onValueChange = { input -> weightText = input.filter { it.isDigit() } },
+                        label = { Text("Peso (kg)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
                 }
+
+                // BANNER DE CÁLCULO DE GANANCIA / VENTA ESTIMADA EN COLOMBIA
+                val currentWeight = weightText.toFloatOrNull() ?: 0f
+                val estValCop = (currentWeight * ESTIMATED_COP_PER_KG).toLong()
+
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 2.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                "Venta Estimada (Colombia):",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                "Tasa ref. $9.000 COP/kg en pie",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                        }
+                        Text(
+                            text = formatCopCurrency(estValCop),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                OutlinedTextField(
+                    value = trackerId,
+                    onValueChange = { trackerId = it },
+                    label = { Text("Collar / Tracker GPS") },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         },
         confirmButton = {
@@ -672,7 +790,8 @@ fun EditAnimalDialog(
                                 displayNumber = displayNumber.trim().ifEmpty { animal.displayNumber },
                                 tagNumber = tagNumber.trim().ifEmpty { animal.tagNumber },
                                 trackerId = trackerId.trim().ifEmpty { animal.trackerId },
-                                ageYears = ageText.toIntOrNull() ?: animal.ageYears
+                                ageYears = ageText.toIntOrNull() ?: animal.ageYears,
+                                weightKg = weightText.toFloatOrNull() ?: (animal.weightKg ?: 450f)
                             )
                         )
                     }
@@ -713,6 +832,7 @@ fun AddAnimalDialog(
     var tagNumber by remember { mutableStateOf("") }
     var trackerId by remember { mutableStateOf("") }
     var ageText by remember { mutableStateOf("2") }
+    var weightText by remember { mutableStateOf("450") }
 
     var isBreedDropdownExpanded by remember { mutableStateOf(false) }
 
@@ -762,25 +882,25 @@ fun AddAnimalDialog(
                     }
                 }
 
-                // IDENTIFICADORES: ACEPTA SOLO NÚMEROS
+                // IDENTIFICADORES: TECLADO NUMÉRICO Y FILTRADO AUTOMÁTICO
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = displayNumber,
                         onValueChange = { input -> displayNumber = input.filter { it.isDigit() } },
-                        label = { Text("Número (Solo dígitos)") },
+                        label = { Text("Número (Ej: 07)") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
                     OutlinedTextField(
                         value = tagNumber,
                         onValueChange = { input -> tagNumber = input.filter { it.isDigit() } },
-                        label = { Text("Arete (Solo dígitos)") },
+                        label = { Text("Arete (Ej: 0342)") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
                 }
 
-                // EDAD: ACEPTA SOLO NÚMEROS ENTEROS
+                // EDAD Y PESO EN PIE
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = ageText,
@@ -790,12 +910,55 @@ fun AddAnimalDialog(
                         modifier = Modifier.weight(1f)
                     )
                     OutlinedTextField(
-                        value = trackerId,
-                        onValueChange = { trackerId = it },
-                        label = { Text("Collar / Tracker") },
+                        value = weightText,
+                        onValueChange = { input -> weightText = input.filter { it.isDigit() } },
+                        label = { Text("Peso (kg)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
                 }
+
+                // BANNER DE CÁLCULO DE GANANCIA / VENTA ESTIMADA EN COLOMBIA
+                val currentWeight = weightText.toFloatOrNull() ?: 0f
+                val estValCop = (currentWeight * ESTIMATED_COP_PER_KG).toLong()
+
+                Surface(
+                    color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.25f),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 2.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column {
+                            Text(
+                                "Venta Estimada (Colombia):",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            Text(
+                                "Tasa ref. $9.000 COP/kg en pie",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.outline
+                            )
+                        }
+                        Text(
+                            text = formatCopCurrency(estValCop),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
+
+                OutlinedTextField(
+                    value = trackerId,
+                    onValueChange = { trackerId = it },
+                    label = { Text("Collar / Tracker GPS") },
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         },
         confirmButton = {
@@ -813,7 +976,7 @@ fun AddAnimalDialog(
                             displayNumber = num,
                             breed = breed.trim().ifEmpty { "Mestizo / Criollo" },
                             ageYears = ageText.toIntOrNull() ?: 2,
-                            weightKg = 450f,
+                            weightKg = weightText.toFloatOrNull() ?: 450f,
                             photoUrl = null,
                             notes = null,
                             trackerId = trk,

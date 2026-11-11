@@ -143,6 +143,11 @@ fun LoginScreen(
             return
         }
 
+        if (isRegisterMode && password.length < 8) {
+            errorMessage = "La contraseña debe tener al menos 8 caracteres"
+            return
+        }
+
         coroutineScope.launch {
             isLoading = true
             errorMessage = null
@@ -269,7 +274,12 @@ fun LoginScreen(
 
                 OutlinedTextField(
                     value = password,
-                    onValueChange = { password = it },
+                    onValueChange = { 
+                        password = it
+                        if (isRegisterMode && errorMessage == "La contraseña debe tener al menos 8 caracteres" && it.length >= 8) {
+                            errorMessage = null
+                        }
+                    },
                     label = { Text("Contraseña") },
                     leadingIcon = { Icon(Icons.Default.Lock, contentDescription = null) },
                     trailingIcon = {
@@ -278,6 +288,17 @@ fun LoginScreen(
                         }
                     },
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    supportingText = {
+                        if (isRegisterMode) {
+                            val isShort = password.isNotEmpty() && password.length < 8
+                            Text(
+                                text = "La contraseña debe tener al menos 8 caracteres" + if (password.isNotEmpty()) " (${password.length}/8)" else "",
+                                color = if (isShort) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        }
+                    },
+                    isError = isRegisterMode && password.isNotEmpty() && password.length < 8,
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(12.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
