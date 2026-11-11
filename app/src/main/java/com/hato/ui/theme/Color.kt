@@ -53,30 +53,30 @@ val WarningYellowContainer = Color(0xFF3B2800)
 val OnWarningYellowContainer = Color(0xFFFFDF9E)
 
 // --- MODO CLARO (HIGH-VISIBILITY FIELD MOCKUP SYSTEM) ---
-val LightBackground = Color(0xFFF4F7F5)
+val LightBackground = Color(0xFFF8FAF9)
 val LightSurface = Color(0xFFFFFFFF)
 val LightSurfaceContainerLowest = Color(0xFFFFFFFF)
-val LightSurfaceContainerLow = Color(0xFFF0F5F2)
-val LightSurfaceContainer = Color(0xFFE8F0EC)
-val LightSurfaceContainerHigh = Color(0xFFDFEAE4)
-val LightSurfaceContainerHighest = Color(0xFFD6E3DC)
+val LightSurfaceContainerLow = Color(0xFFF1F6F3)
+val LightSurfaceContainer = Color(0xFFE8F1EC)
+val LightSurfaceContainerHigh = Color(0xFFDEECE5)
+val LightSurfaceContainerHighest = Color(0xFFD4E5DC)
 
-val LightOnSurface = Color(0xFF0D1512)
-val LightOnSurfaceVariant = Color(0xFF38473F)
+val LightOnSurface = Color(0xFF0F1E17)
+val LightOnSurfaceVariant = Color(0xFF526058)
 
-val LightPrimary = Color(0xFF059669)
+val LightPrimary = Color(0xFF005C3B) // Deep Forest Green matching Stitch mockup
 val LightOnPrimary = Color(0xFFFFFFFF)
-val LightPrimaryContainer = Color(0xFFD1FAE5)
+val LightPrimaryContainer = Color(0xFFD1FAE5) // Mint
 val LightOnPrimaryContainer = Color(0xFF064E3B)
 
-val LightSecondary = Color(0xFF047857)
+val LightSecondary = Color(0xFF006C49)
 val LightOnSecondary = Color(0xFFFFFFFF)
-val LightSecondaryContainer = Color(0xFFA7F3D0)
-val LightOnSecondaryContainer = Color(0xFF064E3B)
+val LightSecondaryContainer = Color(0xFFD4F7E3)
+val LightOnSecondaryContainer = Color(0xFF003825)
 
 val LightTertiary = Color(0xFF10B981)
-val LightOutline = Color(0xFF708075)
-val LightOutlineVariant = Color(0xFFC7D4CD)
+val LightOutline = Color(0xFF78887F)
+val LightOutlineVariant = Color(0xFFE2ECE6)
 
 val LightError = Color(0xFFDC2626)
 val LightOnError = Color(0xFFFFFFFF)
