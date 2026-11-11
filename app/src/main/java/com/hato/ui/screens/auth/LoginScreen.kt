@@ -3,6 +3,7 @@ package com.hato.ui.screens.auth
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -17,8 +18,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -32,6 +36,7 @@ import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.hato.R
 import com.hato.data.api.ApiClient
 import com.hato.data.dto.GoogleLoginRequest
 import com.hato.data.dto.LoginRequest
@@ -195,18 +200,15 @@ fun LoginScreen(
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Logo
-        Box(
+        // Logo y Portada Oficial de Hato
+        Image(
+            painter = painterResource(id = R.drawable.app_logo),
+            contentDescription = "Logo Hato",
             modifier = Modifier
-                .size(90.dp)
-                .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(24.dp)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "🐮",
-                fontSize = 42.sp
-            )
-        }
+                .size(110.dp)
+                .clip(RoundedCornerShape(26.dp)),
+            contentScale = ContentScale.Fit
+        )
 
         Spacer(modifier = Modifier.height(16.dp))
 

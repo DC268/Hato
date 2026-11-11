@@ -10,6 +10,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -21,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -29,6 +32,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.google.android.gms.location.*
 import com.hato.domain.model.*
 import com.hato.ui.scanner.QrScannerScreen
+import com.hato.ui.theme.*
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
@@ -45,8 +49,8 @@ import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 @Composable
 fun MapScreen(
     viewModel: MapViewModel,
-    onNavigateToSettings: () -> Unit,
-    onNavigateToProfile: () -> Unit
+    onNavigateToSettings: () -> Unit = {},
+    onNavigateToProfile: () -> Unit = {}
 ) {
     var showQrScanner by remember { mutableStateOf(false) }
     val context = LocalContext.current
@@ -60,7 +64,7 @@ fun MapScreen(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         locationPermissionGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
-                                  permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+                permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
 
         if (locationPermissionGranted) {
             myLocationOverlay.enableMyLocation()
@@ -96,7 +100,7 @@ fun MapScreen(
         ))
     }
 
-    // Efecto para el Tracking GPS continuo
+    // Efecto para el Tracking GPS continuo del usuario
     LaunchedEffect(locationPermissionGranted) {
         if (locationPermissionGranted) {
             val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 3000L)
@@ -122,10 +126,10 @@ fun MapScreen(
             update = { view ->
                 val trigger = viewModel.mapUpdateTrigger
 
-                // Limpiar únicamente polígonos y marcadores que dibujamos nosotros
+                // Limpiar únicamente polígonos y marcadores creados dinámicamente
                 view.overlays.removeAll { it is Polygon || it is Marker }
 
-                // Dibujar animales reales y simulados
+                // Dibujar animales en el mapa (todos con emoji de cabeza de vaca 🐮)
                 viewModel.animals.forEach { animal ->
                     viewModel.animalPositions[animal.id]?.let { pos ->
                         val marker = Marker(view).apply {
@@ -133,12 +137,9 @@ fun MapScreen(
                             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
                             title = "${animal.name} (${animal.displayNumber})"
 
-                            val isLinked = animal.isLinkedDevice || animal.id.contains("bt") || animal.id.contains("phone") || animal.displayNumber == "BT"
-                            if (isLinked) {
-                                snippet = "📍 GPS Vinculado en Vivo · Batería 94%"
-                            } else {
-                                snippet = "Raza: ${animal.breed} · Arete: ${animal.tagNumber}"
-                            }
+                            val isLinked = animal.isLinkedDevice || viewModel.linkedTrackerIds.contains(animal.trackerId)
+                            val battery = viewModel.getBatteryLevel(animal.id)
+                            snippet = if (isLinked) "🐮 Collar Conectado · Batería $battery%" else "Raza: ${animal.breed} · Arete: #${animal.tagNumber}"
 
                             val isAlert = animal.healthStatus == HealthStatus.ALERT || animal.healthStatus == HealthStatus.ATTENTION
                             icon = createCowMarker(context, animal.displayNumber, isAlert, isLinked)
@@ -160,7 +161,7 @@ fun MapScreen(
                         if (!trail.isNullOrEmpty() && trail.size >= 2) {
                             val polyline = Polyline().apply {
                                 setPoints(trail.map { OsmGeoPoint(it.lat, it.lng) })
-                                outlinePaint.color = android.graphics.Color.argb(255, 255, 140, 0) // Naranja vivo
+                                outlinePaint.color = android.graphics.Color.argb(255, 255, 140, 0) // Naranja dinámico
                                 outlinePaint.strokeWidth = 9f
                             }
                             view.overlays.add(polyline)
@@ -168,7 +169,7 @@ fun MapScreen(
                     }
                 }
 
-                // Dibujar ruta guiada (desde mi ubicación al animal seleccionado)
+                // Dibujar ruta guiada (desde ubicación del ganadero hasta el animal)
                 if (viewModel.showRouteGuidance) {
                     val loc = myLocationOverlay.myLocation
                     val animal = viewModel.selectedAnimal ?: viewModel.animals.firstOrNull()
@@ -177,20 +178,20 @@ fun MapScreen(
                     if (loc != null && animalPos != null) {
                         val polyline = Polyline().apply {
                             setPoints(listOf(loc, OsmGeoPoint(animalPos.lat, animalPos.lng)))
-                            outlinePaint.color = android.graphics.Color.argb(255, 30, 144, 255) // Azul guía
+                            outlinePaint.color = android.graphics.Color.argb(255, 16, 185, 129) // Verde esmeralda de ruta
                             outlinePaint.strokeWidth = 10f
                         }
                         view.overlays.add(polyline)
                     }
                 }
 
-                // Dibujar zonas guardadas (potreros)
+                // Dibujar potreros guardados creados por el usuario
                 viewModel.savedZones.forEach { zone ->
                     if (zone is PolygonGeofence) {
                         val polygon = Polygon().apply {
                             points = zone.points.map { OsmGeoPoint(it.lat, it.lng) }
-                            fillPaint.color = android.graphics.Color.argb(55, 46, 125, 50) // Verde potrero
-                            outlinePaint.color = android.graphics.Color.argb(255, 27, 94, 32)
+                            fillPaint.color = android.graphics.Color.argb(55, 16, 185, 129) // Esmeralda suave
+                            outlinePaint.color = android.graphics.Color.argb(255, 16, 185, 129)
                             outlinePaint.strokeWidth = 6f
                             title = "${zone.name} (${String.format("%.1f", zone.areaHa)} Ha)"
                         }
@@ -198,17 +199,18 @@ fun MapScreen(
                     }
                 }
 
-                // Dibujar zona en progreso de creación
+                // Dibujar potrero en proceso de trazado (ordenado de forma convexa para evitar reloj de arena)
                 if (viewModel.currentDrawingPoints.isNotEmpty()) {
+                    val orderedPoints = orderPointsConvex(viewModel.currentDrawingPoints)
                     val drawingPolygon = Polygon().apply {
-                        points = viewModel.currentDrawingPoints.map { OsmGeoPoint(it.lat, it.lng) }
-                        fillPaint.color = android.graphics.Color.argb(85, 255, 193, 7)
-                        outlinePaint.color = android.graphics.Color.argb(255, 255, 193, 7)
-                        outlinePaint.strokeWidth = 5f
+                        points = orderedPoints.map { OsmGeoPoint(it.lat, it.lng) }
+                        fillPaint.color = android.graphics.Color.argb(85, 251, 191, 36) // Amarillo amber de trazado
+                        outlinePaint.color = android.graphics.Color.argb(255, 251, 191, 36)
+                        outlinePaint.strokeWidth = 6f
                     }
                     view.overlays.add(drawingPolygon)
 
-                    viewModel.currentDrawingPoints.forEach { point ->
+                    orderedPoints.forEach { point ->
                         val marker = Marker(view).apply {
                             position = OsmGeoPoint(point.lat, point.lng)
                             setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
@@ -221,7 +223,8 @@ fun MapScreen(
             }
         )
 
-        // 2. BARRA SUPERIOR DE CONTEXTO
+        // 2. BARRA SUPERIOR: SELECTOR DE POTREROS DEL USUARIO
+        // (Ajustes de la esquina superior derecha quitado según requerimiento)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -233,72 +236,92 @@ fun MapScreen(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                var showFarmDropdown by remember { mutableStateOf(false) }
+                var showZoneDropdown by remember { mutableStateOf(false) }
+
+                // Selector exclusivo para los potreros creados por el usuario
                 Box {
                     Row(
                         modifier = Modifier
-                            .clickable { showFarmDropdown = true }
+                            .clickable(enabled = viewModel.savedZones.isNotEmpty()) { showZoneDropdown = true }
                             .padding(4.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Default.Place, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                        Text("🌾", fontSize = 18.sp)
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = viewModel.currentFarm.name.uppercase(),
+                            text = if (viewModel.savedZones.isEmpty()) {
+                                "SIN POTREROS CREADOS"
+                            } else {
+                                (viewModel.selectedZone?.name ?: "TODOS LOS POTREROS").uppercase()
+                            },
+                            style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            fontSize = 17.sp,
                             color = MaterialTheme.colorScheme.onSurface
                         )
-                        Icon(Icons.Default.ArrowDropDown, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
+                        if (viewModel.savedZones.isNotEmpty()) {
+                            Icon(
+                                Icons.Default.ArrowDropDown,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
 
-                    DropdownMenu(
-                        expanded = showFarmDropdown,
-                        onDismissRequest = { showFarmDropdown = false }
-                    ) {
-                        viewModel.farms.forEach { farm ->
+                    if (viewModel.savedZones.isNotEmpty()) {
+                        DropdownMenu(
+                            expanded = showZoneDropdown,
+                            onDismissRequest = { showZoneDropdown = false }
+                        ) {
                             DropdownMenuItem(
-                                text = { Text(farm.name) },
+                                text = { Text("Ver Todos los Potreros", fontWeight = FontWeight.Bold) },
                                 onClick = {
-                                    viewModel.currentFarm = farm
-                                    showFarmDropdown = false
-                                    mapView.controller.animateTo(OsmGeoPoint(farm.center.lat, farm.center.lng))
+                                    viewModel.selectedZone = null
+                                    showZoneDropdown = false
                                 }
                             )
+                            viewModel.savedZones.forEach { zone ->
+                                DropdownMenuItem(
+                                    text = { Text("${zone.name} (${String.format("%.1f", zone.areaHa)} ha)") },
+                                    onClick = {
+                                        viewModel.selectedZone = zone
+                                        showZoneDropdown = false
+                                        if (zone is PolygonGeofence && zone.points.isNotEmpty()) {
+                                            val avgLat = zone.points.map { it.lat }.average()
+                                            val avgLng = zone.points.map { it.lng }.average()
+                                            mapView.controller.animateTo(OsmGeoPoint(avgLat, avgLng))
+                                        }
+                                    }
+                                )
+                            }
                         }
                     }
                 }
 
+                // Indicador de estado satelital / dispositivos vinculados
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    // Indicador de dispositivos vinculados en vivo
-                    if (viewModel.connectedDevices.isNotEmpty() || viewModel.phoneAsTrackerEnabled) {
+                    if (viewModel.connectedDevices.isNotEmpty()) {
                         Surface(
                             color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(99.dp)
                         ) {
                             Row(
-                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                verticalAlignment = Alignment.CenterVertically
+                                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .size(8.dp)
+                                        .size(7.dp)
                                         .background(MaterialTheme.colorScheme.primary, CircleShape)
                                 )
-                                Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    "GPS EN VIVO",
-                                    fontSize = 10.sp,
+                                    "${viewModel.connectedDevices.size} VINCULADOS",
+                                    style = MaterialTheme.typography.labelSmall,
                                     fontWeight = FontWeight.Bold,
                                     color = MaterialTheme.colorScheme.onPrimaryContainer
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
-                    }
-
-                    IconButton(onClick = onNavigateToSettings) {
-                        Icon(Icons.Default.Settings, contentDescription = "Ajustes", tint = MaterialTheme.colorScheme.onSurface)
                     }
                 }
             }
@@ -314,183 +337,308 @@ fun MapScreen(
             }
         }
 
-        // 4. BOTÓN ÚNICO DE ACERCAMIENTO Y CENTRADO INTELIGENTE
+        // 4. BOTÓN ÚNICO DE ACERCAMIENTO INTELIGENTE
         Box(
             modifier = Modifier
                 .align(Alignment.CenterEnd)
-                .padding(end = 16.dp, bottom = 120.dp)
+                .padding(end = 16.dp)
         ) {
             FloatingActionButton(
                 onClick = {
-                    val animal = viewModel.selectedAnimal ?: viewModel.animals.firstOrNull()
-                    val pos = animal?.let { viewModel.animalPositions[it.id] }
-                    if (pos != null) {
-                        mapView.controller.animateTo(OsmGeoPoint(pos.lat, pos.lng))
-                        mapView.controller.setZoom(18.0)
-                    } else {
-                        val myLoc = myLocationOverlay.myLocation
-                        if (myLoc != null) {
-                            mapView.controller.animateTo(myLoc)
-                            mapView.controller.setZoom(17.5)
-                        } else {
-                            mapView.controller.setZoom(mapView.zoomLevelDouble + 1.0)
-                        }
+                    val currentZoom = mapView.zoomLevelDouble
+                    val targetZoom = if (currentZoom >= 18.0) 14.5 else currentZoom + 1.5
+                    mapView.controller.zoomTo(targetZoom)
+
+                    val target = viewModel.selectedAnimal
+                    val targetPos = target?.let { viewModel.animalPositions[it.id] }
+                    if (targetPos != null) {
+                        mapView.controller.animateTo(OsmGeoPoint(targetPos.lat, targetPos.lng))
+                    } else if (myLocationOverlay.myLocation != null) {
+                        mapView.controller.animateTo(myLocationOverlay.myLocation)
                     }
                 },
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+                containerColor = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.primary,
                 shape = CircleShape,
+                elevation = FloatingActionButtonDefaults.elevation(6.dp),
                 modifier = Modifier.size(52.dp)
             ) {
-                Icon(Icons.Default.LocationOn, contentDescription = "Acercar y Centrar")
+                Icon(Icons.Default.Place, contentDescription = "Zoom y Centrado")
             }
         }
 
-        // 5. PESTAÑA INFERIOR DE ESTADO Y TELEMETRÍA DEL GANADO
+        // 5. HOJA INFERIOR (BOTTOM SHEET): DESPLEGABLE Y CARRUSEL DE GANADO
         Surface(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
                 .fillMaxWidth(),
-            shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+            shape = RoundedCornerShape(topStart = 20.dp, topEnd = 20.dp),
             color = MaterialTheme.colorScheme.surface,
-            shadowElevation = 12.dp
+            tonalElevation = 10.dp,
+            shadowElevation = 16.dp
         ) {
             Column(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .padding(horizontal = 16.dp, vertical = 10.dp)
                     .fillMaxWidth()
             ) {
-                // Indicador para expandir/colapsar
+                // Manija para expandir / colapsar
                 Box(
                     modifier = Modifier
-                        .width(40.dp)
+                        .width(44.dp)
                         .height(4.dp)
                         .background(MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(2.dp))
                         .align(Alignment.CenterHorizontally)
                         .clickable { viewModel.isBottomSheetExpanded = !viewModel.isBottomSheetExpanded }
                 )
 
-                Spacer(modifier = Modifier.height(10.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
                 if (viewModel.isBottomSheetExpanded) {
-                    val selectedAnimal = viewModel.selectedAnimal ?: viewModel.animals.firstOrNull()
-
-                    if (selectedAnimal != null) {
-                        val pos = viewModel.animalPositions[selectedAnimal.id]
-                        val isLinked = selectedAnimal.isLinkedDevice || selectedAnimal.displayNumber == "BT"
-
+                    if (viewModel.animals.isEmpty()) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 12.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text("🐮", fontSize = 28.sp)
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                "No hay ganado registrado",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                "Añade tu primer animal en la sección 'Hato' o vincula un collar GPS en 'Ajustes'.",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    } else {
+                        // Título y contador de cabezas
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Column {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = selectedAnimal.name,
-                                        fontSize = 18.sp,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSurface
-                                    )
-                                    if (isLinked) {
-                                        Spacer(modifier = Modifier.width(6.dp))
+                            Text(
+                                "Ganado Monitoreado",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Text(
+                                "${viewModel.animals.size} Cabezas Registradas",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.secondary,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // CARRUSEL HORIZONTAL SCROLLABLE DE ANIMALES
+                        LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            items(viewModel.animals, key = { it.id }) { animal ->
+                                val isSelected = viewModel.selectedAnimal?.id == animal.id
+                                val battery = viewModel.getBatteryLevel(animal.id)
+                                val isAlert = animal.healthStatus == HealthStatus.ALERT
+
+                                Surface(
+                                    modifier = Modifier
+                                        .clickable {
+                                            viewModel.selectedAnimal = animal
+                                            viewModel.animalPositions[animal.id]?.let { pos ->
+                                                mapView.controller.animateTo(OsmGeoPoint(pos.lat, pos.lng))
+                                            }
+                                        },
+                                    color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
+                                    shape = RoundedCornerShape(12.dp),
+                                    border = if (isSelected) androidx.compose.foundation.BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary) else null
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Text("🐮", fontSize = 22.sp)
+
+                                        Column {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                            ) {
+                                                Text(
+                                                    text = animal.name,
+                                                    style = MaterialTheme.typography.labelLarge,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
+                                                )
+                                                Box(
+                                                    modifier = Modifier
+                                                        .size(6.dp)
+                                                        .background(
+                                                            if (isAlert) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
+                                                            CircleShape
+                                                        )
+                                                )
+                                            }
+
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(6.dp)
+                                            ) {
+                                                Text(
+                                                    text = "#${animal.displayNumber}",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                                Text("•", color = MaterialTheme.colorScheme.outline)
+                                                // BATERÍA DEL DISPOSITIVO
+                                                Text(
+                                                    text = "⚡ $battery%",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = if (battery < 20) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(10.dp))
+
+                        // TARJETA DE DETALLES DEL ANIMAL SELECCIONADO
+                        val selectedAnimal = viewModel.selectedAnimal ?: viewModel.animals.firstOrNull()
+                        if (selectedAnimal != null) {
+                            val pos = viewModel.animalPositions[selectedAnimal.id]
+                            val battery = viewModel.getBatteryLevel(selectedAnimal.id)
+
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(14.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                            ) {
+                                Column(modifier = Modifier.padding(12.dp)) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Column {
+                                            Text(
+                                                text = "${selectedAnimal.name} (${selectedAnimal.displayNumber})",
+                                                style = MaterialTheme.typography.titleMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Text(
+                                                text = "Raza: ${selectedAnimal.breed} · Arete: #${selectedAnimal.tagNumber}",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+
+                                        // Estado de Salud / Geocerca
                                         Surface(
-                                            color = MaterialTheme.colorScheme.primary,
-                                            shape = RoundedCornerShape(6.dp)
+                                            color = when (selectedAnimal.healthStatus) {
+                                                HealthStatus.ALERT -> MaterialTheme.colorScheme.errorContainer
+                                                HealthStatus.ATTENTION -> Color(0xFFFEF3C7)
+                                                else -> MaterialTheme.colorScheme.primaryContainer
+                                            },
+                                            shape = RoundedCornerShape(99.dp)
                                         ) {
                                             Text(
-                                                "VINCULADO",
-                                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                                                color = Color.White,
-                                                fontSize = 9.sp,
+                                                text = when (selectedAnimal.healthStatus) {
+                                                    HealthStatus.ALERT -> "FUERA DE POTRERO"
+                                                    HealthStatus.ATTENTION -> "QUIETO / INACTIVO"
+                                                    else -> "DENTRO / SEGURO"
+                                                },
+                                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Bold,
+                                                color = when (selectedAnimal.healthStatus) {
+                                                    HealthStatus.ALERT -> MaterialTheme.colorScheme.onErrorContainer
+                                                    HealthStatus.ATTENTION -> Color(0xFFB45309)
+                                                    else -> MaterialTheme.colorScheme.onPrimaryContainer
+                                                }
+                                            )
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.height(10.dp))
+
+                                    // Métricas de Telemetría y Batería
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        TelemetryItem("Batería", "$battery% ⚡")
+                                        TelemetryItem("Velocidad", "1.2 km/h")
+                                        TelemetryItem(
+                                            "Coordenadas",
+                                            pos?.let { "${String.format("%.4f", it.lat)}, ${String.format("%.4f", it.lng)}" } ?: "Buscando..."
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.height(10.dp))
+
+                                    // Botones de acción en el mapa
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        Button(
+                                            onClick = { viewModel.showTrail = !viewModel.showTrail },
+                                            modifier = Modifier.weight(1f).height(40.dp),
+                                            shape = RoundedCornerShape(10.dp),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = if (viewModel.showTrail) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surface,
+                                                contentColor = if (viewModel.showTrail) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurface
+                                            )
+                                        ) {
+                                            Text(
+                                                if (viewModel.showTrail) "Ocultar Rastro" else "Ver Recorrido",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+
+                                        Button(
+                                            onClick = { viewModel.showRouteGuidance = !viewModel.showRouteGuidance },
+                                            modifier = Modifier.weight(1f).height(40.dp),
+                                            shape = RoundedCornerShape(10.dp),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = if (viewModel.showRouteGuidance) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface,
+                                                contentColor = if (viewModel.showRouteGuidance) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface
+                                            )
+                                        ) {
+                                            Text(
+                                                if (viewModel.showRouteGuidance) "Ruta Activa" else "Guiar a la Vaca",
+                                                style = MaterialTheme.typography.labelSmall,
                                                 fontWeight = FontWeight.Bold
                                             )
                                         }
                                     }
                                 }
-                                Text(
-                                    text = "Arete: ${selectedAnimal.tagNumber} · Collar: ${selectedAnimal.trackerId}",
-                                    fontSize = 12.sp,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-
-                            // Estado de salud / alerta
-                            Surface(
-                                color = when (selectedAnimal.healthStatus) {
-                                    HealthStatus.ALERT -> MaterialTheme.colorScheme.errorContainer
-                                    HealthStatus.ATTENTION -> Color(0xFFFFF3E0)
-                                    else -> MaterialTheme.colorScheme.primaryContainer
-                                },
-                                shape = RoundedCornerShape(8.dp)
-                            ) {
-                                Text(
-                                    text = when (selectedAnimal.healthStatus) {
-                                        HealthStatus.ALERT -> "FUERA DE ZONA"
-                                        HealthStatus.ATTENTION -> "INACTIVO"
-                                        else -> "DENTRO / SEGURO"
-                                    },
-                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = when (selectedAnimal.healthStatus) {
-                                        HealthStatus.ALERT -> MaterialTheme.colorScheme.onErrorContainer
-                                        HealthStatus.ATTENTION -> Color(0xFFE65100)
-                                        else -> MaterialTheme.colorScheme.onPrimaryContainer
-                                    }
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // Métricas de Telemetría
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            TelemetryItem("Batería", "94% ⚡")
-                            TelemetryItem("Velocidad", "1.4 km/h")
-                            TelemetryItem("Coordenadas", pos?.let { "${String.format("%.4f", it.lat)}, ${String.format("%.4f", it.lng)}" } ?: "Buscando...")
-                        }
-
-                        Spacer(modifier = Modifier.height(12.dp))
-
-                        // Acciones de mapa
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
-                        ) {
-                            Button(
-                                onClick = { viewModel.showTrail = !viewModel.showTrail },
-                                modifier = Modifier.weight(1f).height(44.dp),
-                                shape = RoundedCornerShape(10.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (viewModel.showTrail) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.surfaceVariant,
-                                    contentColor = if (viewModel.showTrail) MaterialTheme.colorScheme.onSecondary else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            ) {
-                                Text(if (viewModel.showTrail) "Ocultar Rastro" else "Ver Recorrido", fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                            }
-
-                            Button(
-                                onClick = { viewModel.showRouteGuidance = !viewModel.showRouteGuidance },
-                                modifier = Modifier.weight(1f).height(44.dp),
-                                shape = RoundedCornerShape(10.dp),
-                                colors = ButtonDefaults.buttonColors(
-                                    containerColor = if (viewModel.showRouteGuidance) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                                    contentColor = if (viewModel.showRouteGuidance) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            ) {
-                                Text(if (viewModel.showRouteGuidance) "Ruta Activa" else "Guiar a la Vaca", fontSize = 11.sp, fontWeight = FontWeight.Bold)
                             }
                         }
                     }
                 } else {
                     Text(
                         "Ganado Monitoreado: ${viewModel.animals.size} cabezas (Toque para expandir)",
-                        modifier = Modifier.padding(bottom = 8.dp).align(Alignment.CenterHorizontally),
-                        fontSize = 12.sp,
+                        modifier = Modifier
+                            .padding(bottom = 6.dp)
+                            .align(Alignment.CenterHorizontally),
+                        style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
@@ -508,8 +656,8 @@ fun MapScreen(
 @Composable
 fun TelemetryItem(label: String, value: String) {
     Column {
-        Text(label.uppercase(), fontSize = 10.sp, color = MaterialTheme.colorScheme.outline, fontWeight = FontWeight.Bold)
-        Text(value, fontSize = 13.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
+        Text(label.uppercase(), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.outline, fontWeight = FontWeight.Bold)
+        Text(value, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSurface)
     }
 }
 
@@ -536,9 +684,9 @@ fun DrawingOverlay(onFinish: () -> Unit, onCancel: () -> Unit) {
             shadowElevation = 4.dp
         ) {
             Text(
-                "Toque en el mapa los vértices del potrero",
+                "Marca los vértices del potrero (sin cruces)",
                 modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp),
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.labelSmall,
                 fontWeight = FontWeight.Medium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer
             )
@@ -557,8 +705,7 @@ fun DrawingOverlay(onFinish: () -> Unit, onCancel: () -> Unit) {
 }
 
 /**
- * Crea el icono personalizado para el mapa:
- * Si es un dispositivo vinculado, muestra un borde destacado y distintivo azul/verde con símbolo de GPS/collar.
+ * Crea el icono personalizado para el mapa con el emoji de la cabeza de vaca (🐮)
  */
 fun createCowMarker(
     context: android.content.Context,
@@ -571,28 +718,27 @@ fun createCowMarker(
     val canvas = android.graphics.Canvas(bitmap)
     val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG)
 
-    // Borde exterior si es un dispositivo vinculado
+    // Borde exterior verde brillante para dispositivos vinculados
     if (isLinkedDevice) {
-        paint.color = android.graphics.Color.parseColor("#00E676") // Verde fluorescente
+        paint.color = android.graphics.Color.parseColor("#4EDEA3")
         canvas.drawCircle(size / 2f, size / 2f, (size / 2f), paint)
     }
 
     // Fondo del marcador
     val radius = if (isLinkedDevice) (size / 2f) - 6f else (size / 2f)
     paint.color = when {
-        isAlert -> android.graphics.Color.parseColor("#BA1A1A") // Rojo alarma
-        isLinkedDevice -> android.graphics.Color.parseColor("#1565C0") // Azul tracker
-        else -> android.graphics.Color.parseColor("#2E6B34") // Verde normal
+        isAlert -> android.graphics.Color.parseColor("#BA1A1A") // Rojo alerta
+        isLinkedDevice -> android.graphics.Color.parseColor("#1565C0") // Azul enlace
+        else -> android.graphics.Color.parseColor("#10B981") // Verde esmeralda normal
     }
     canvas.drawCircle(size / 2f, size / 2f, radius, paint)
 
-    // Emoji de Vaca o Tracker
+    // Emoji de Cabeza de Vaca constante
     paint.textSize = 50f
     paint.textAlign = android.graphics.Paint.Align.CENTER
-    val emoji = if (isLinkedDevice) "📡" else "🐮"
-    canvas.drawText(emoji, size / 2f, (size / 2f) - ((paint.descent() + paint.ascent()) / 2f) - 14f, paint)
+    canvas.drawText("🐮", size / 2f, (size / 2f) - ((paint.descent() + paint.ascent()) / 2f) - 14f, paint)
 
-    // Texto con el arete o ID
+    // Texto con el número identificador
     paint.color = android.graphics.Color.WHITE
     paint.textSize = 26f
     paint.typeface = android.graphics.Typeface.DEFAULT_BOLD

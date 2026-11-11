@@ -12,7 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -35,6 +35,22 @@ import com.hato.domain.model.HealthStatus
 import com.hato.ui.map.MapViewModel
 import com.hato.ui.theme.*
 
+val COMMON_CATTLE_BREEDS = listOf(
+    "Brahman",
+    "Holstein",
+    "Jersey",
+    "Angus",
+    "Simmental",
+    "Gyr",
+    "Charolais",
+    "Brangus",
+    "Nelore",
+    "Normando",
+    "Pardo Suizo",
+    "Mestizo / Criollo",
+    "Otra"
+)
+
 @Composable
 fun AnimalsScreen(
     viewModel: MapViewModel,
@@ -45,7 +61,7 @@ fun AnimalsScreen(
     var selectedForEdit by remember { mutableStateOf<Animal?>(null) }
 
     var searchQuery by remember { mutableStateOf("") }
-    var selectedFilter by remember { mutableStateOf("TODOS") } // "TODOS", "ACTIVOS", "ALERTA"
+    var selectedFilter by remember { mutableStateOf("TODOS") }
 
     // Filtrado en vivo de animales creados
     val filteredAnimals = viewModel.animals.filter { animal ->
@@ -72,7 +88,8 @@ fun AnimalsScreen(
                 Text(
                     text = "${animal.name} (${animal.displayNumber})",
                     style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold
                 )
             },
             text = {
@@ -85,11 +102,12 @@ fun AnimalsScreen(
                     Text(
                         "Collar / Dispositivo: ${animal.trackerId}",
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        "Selecciona qué acción deseas realizar con este animal:",
+                        "Selecciona la acción a realizar:",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -150,7 +168,7 @@ fun AnimalsScreen(
         AddAnimalDialog(
             onDismiss = { showAddAnimalDialog = false },
             onSave = { newAnimal ->
-                viewModel.animals.add(newAnimal)
+                viewModel.addAnimal(newAnimal)
                 showAddAnimalDialog = false
             }
         )
@@ -204,7 +222,7 @@ fun AnimalsScreen(
                 }
 
                 Surface(
-                    color = SurfaceContainerHigh,
+                    color = MaterialTheme.colorScheme.surfaceVariant,
                     shape = RoundedCornerShape(99.dp)
                 ) {
                     Text(
@@ -226,11 +244,12 @@ fun AnimalsScreen(
                 Text(
                     text = "Hato Registrado",
                     style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold
                 )
 
                 Surface(
-                    color = SecondaryContainer.copy(alpha = 0.25f),
+                    color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
                     shape = RoundedCornerShape(99.dp)
                 ) {
                     Text(
@@ -244,7 +263,7 @@ fun AnimalsScreen(
             }
 
             Text(
-                text = "Toca cualquier animal para ubicarlo en el mapa satelital o calibrar su telemetría de campo.",
+                text = "Toca cualquier animal para ubicarlo en el mapa o editar sus datos.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
@@ -255,15 +274,15 @@ fun AnimalsScreen(
                 value = searchQuery,
                 onValueChange = { searchQuery = it },
                 placeholder = {
-                    Text("Buscar por arete, collar o raza...", style = MaterialTheme.typography.bodySmall, color = Outline)
+                    Text("Buscar por arete, collar o raza...", style = MaterialTheme.typography.bodySmall)
                 },
                 leadingIcon = {
-                    Icon(Icons.Default.Search, contentDescription = "Buscar", tint = Outline, modifier = Modifier.size(20.dp))
+                    Icon(Icons.Default.Search, contentDescription = "Buscar", modifier = Modifier.size(20.dp))
                 },
                 trailingIcon = {
                     if (searchQuery.isNotEmpty()) {
                         IconButton(onClick = { searchQuery = "" }) {
-                            Icon(Icons.Default.Close, contentDescription = "Limpiar", tint = Outline, modifier = Modifier.size(18.dp))
+                            Icon(Icons.Default.Close, contentDescription = "Limpiar", modifier = Modifier.size(18.dp))
                         }
                     }
                 },
@@ -271,15 +290,7 @@ fun AnimalsScreen(
                     .fillMaxWidth()
                     .padding(bottom = 10.dp),
                 singleLine = true,
-                shape = RoundedCornerShape(10.dp),
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = SurfaceContainerLow,
-                    unfocusedContainerColor = SurfaceContainerLow,
-                    focusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
-                    unfocusedBorderColor = OutlineVariant,
-                    focusedTextColor = OnSurface,
-                    unfocusedTextColor = OnSurface
-                )
+                shape = RoundedCornerShape(10.dp)
             )
 
             // Filtros tipo píldoras
@@ -296,9 +307,9 @@ fun AnimalsScreen(
                     val isSelected = selectedFilter == filterKey
                     Surface(
                         modifier = Modifier.clickable { selectedFilter = filterKey },
-                        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else SurfaceContainer,
+                        color = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
                         shape = RoundedCornerShape(99.dp),
-                        border = if (!isSelected) androidx.compose.foundation.BorderStroke(1.dp, OutlineVariant) else null
+                        border = if (!isSelected) androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant) else null
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -312,7 +323,7 @@ fun AnimalsScreen(
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium
                             )
                             Surface(
-                                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f) else SurfaceContainerHigh,
+                                color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.2f) else MaterialTheme.colorScheme.surface,
                                 shape = RoundedCornerShape(99.dp)
                             ) {
                                 Text(
@@ -330,7 +341,6 @@ fun AnimalsScreen(
 
             // Lista de tarjetas de animales
             if (viewModel.animals.isEmpty()) {
-                // Estado vacío limpio sin datos de referencia
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -345,15 +355,10 @@ fun AnimalsScreen(
                         Surface(
                             modifier = Modifier.size(64.dp),
                             shape = RoundedCornerShape(16.dp),
-                            color = SurfaceContainerHigh
+                            color = MaterialTheme.colorScheme.surfaceVariant
                         ) {
                             Box(contentAlignment = Alignment.Center) {
-                                Icon(
-                                    Icons.Default.Place,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(32.dp)
-                                )
+                                Text("🐮", fontSize = 32.sp)
                             }
                         }
                         Text(
@@ -363,7 +368,7 @@ fun AnimalsScreen(
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            text = "Presiona 'Añadir Animal' para dar de alta tu primera cabeza y vincular su collar o dispositivo de monitoreo.",
+                            text = "Presiona 'Añadir Animal' para dar de alta tu primera cabeza y vincular su collar o dispositivo GPS.",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center
@@ -388,20 +393,19 @@ fun AnimalsScreen(
                 ) {
                     items(filteredAnimals, key = { it.id }) { animal ->
                         val isAlert = animal.healthStatus == HealthStatus.ALERT
-                        val isGpsTracker = animal.trackerId.contains("GPS", ignoreCase = true) || animal.trackerId.contains("TRK", ignoreCase = true)
+                        val battery = viewModel.getBatteryLevel(animal.id)
 
-                        // Tarjeta de ganado técnica ("Verdant Precision" style)
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable { selectedForAction = animal },
                             colors = CardDefaults.cardColors(
-                                containerColor = SurfaceContainerLow
+                                containerColor = MaterialTheme.colorScheme.surfaceVariant
                             ),
                             shape = RoundedCornerShape(14.dp),
                             border = androidx.compose.foundation.BorderStroke(
                                 1.dp,
-                                if (isAlert) MaterialTheme.colorScheme.error.copy(alpha = 0.6f) else OutlineVariant.copy(alpha = 0.5f)
+                                if (isAlert) MaterialTheme.colorScheme.error.copy(alpha = 0.6f) else MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
                             )
                         ) {
                             Column(modifier = Modifier.padding(14.dp)) {
@@ -410,29 +414,14 @@ fun AnimalsScreen(
                                     verticalAlignment = Alignment.Top,
                                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
-                                    // Hardware Badge técnico
+                                    // Insignia con Emoji de Cabeza de Vaca 🐮
                                     Surface(
                                         modifier = Modifier.size(46.dp),
                                         shape = RoundedCornerShape(10.dp),
-                                        color = SurfaceContainerHigh
+                                        color = MaterialTheme.colorScheme.surface
                                     ) {
-                                        Column(
-                                            modifier = Modifier.fillMaxSize(),
-                                            horizontalAlignment = Alignment.CenterHorizontally,
-                                            verticalArrangement = Arrangement.Center
-                                        ) {
-                                            Text(
-                                                text = if (isGpsTracker) "GPS" else "BLE",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                fontWeight = FontWeight.Bold,
-                                                color = if (isAlert) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-                                            )
-                                            Icon(
-                                                Icons.Default.LocationOn,
-                                                contentDescription = null,
-                                                tint = MaterialTheme.colorScheme.tertiary,
-                                                modifier = Modifier.size(14.dp)
-                                            )
+                                        Box(contentAlignment = Alignment.Center) {
+                                            Text("🐮", fontSize = 24.sp)
                                         }
                                     }
 
@@ -452,7 +441,7 @@ fun AnimalsScreen(
 
                                             // Pill de estado
                                             Surface(
-                                                color = if (isAlert) MaterialTheme.colorScheme.errorContainer else SecondaryContainer.copy(alpha = 0.2f),
+                                                color = if (isAlert) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer,
                                                 shape = RoundedCornerShape(99.dp)
                                             ) {
                                                 Row(
@@ -471,7 +460,7 @@ fun AnimalsScreen(
                                                     Text(
                                                         text = if (isAlert) "ALERTA" else "EN VIVO",
                                                         style = MaterialTheme.typography.labelSmall,
-                                                        color = if (isAlert) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.secondary,
+                                                        color = if (isAlert) MaterialTheme.colorScheme.onErrorContainer else MaterialTheme.colorScheme.onPrimaryContainer,
                                                         fontWeight = FontWeight.Bold
                                                     )
                                                 }
@@ -485,7 +474,7 @@ fun AnimalsScreen(
                                             modifier = Modifier.padding(top = 2.dp)
                                         )
 
-                                        // Metadatos (Arete, Edad, Enlace)
+                                        // Metadatos
                                         Row(
                                             modifier = Modifier
                                                 .fillMaxWidth()
@@ -494,7 +483,7 @@ fun AnimalsScreen(
                                             horizontalArrangement = Arrangement.spacedBy(6.dp)
                                         ) {
                                             Surface(
-                                                color = SurfaceContainerHigh,
+                                                color = MaterialTheme.colorScheme.surface,
                                                 shape = RoundedCornerShape(6.dp)
                                             ) {
                                                 Text(
@@ -503,11 +492,11 @@ fun AnimalsScreen(
                                                     style = MaterialTheme.typography.labelSmall,
                                                     color = MaterialTheme.colorScheme.onSurface,
                                                     fontFamily = FontFamily.Monospace,
-                                                    fontWeight = FontWeight.Medium
+                                                    fontWeight = FontWeight.Bold
                                                 )
                                             }
 
-                                            Text("·", color = Outline)
+                                            Text("·", color = MaterialTheme.colorScheme.outline)
 
                                             Text(
                                                 text = "Edad: ${animal.ageYears} años",
@@ -515,7 +504,7 @@ fun AnimalsScreen(
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
 
-                                            Text("·", color = Outline)
+                                            Text("·", color = MaterialTheme.colorScheme.outline)
 
                                             Text(
                                                 text = "Sincronizado",
@@ -531,7 +520,7 @@ fun AnimalsScreen(
                                 HorizontalDivider(
                                     modifier = Modifier.padding(top = 10.dp, bottom = 8.dp),
                                     thickness = 1.dp,
-                                    color = SurfaceContainerHighest.copy(alpha = 0.5f)
+                                    color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.3f)
                                 )
 
                                 Row(
@@ -558,9 +547,9 @@ fun AnimalsScreen(
                                     }
 
                                     Text(
-                                        text = "94% ⚡",
+                                        text = "$battery% ⚡",
                                         style = MaterialTheme.typography.labelSmall,
-                                        color = MaterialTheme.colorScheme.primary,
+                                        color = if (battery < 20) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
@@ -573,6 +562,7 @@ fun AnimalsScreen(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditAnimalDialog(
     animal: Animal,
@@ -586,6 +576,8 @@ fun EditAnimalDialog(
     var tagNumber by remember { mutableStateOf(animal.tagNumber) }
     var trackerId by remember { mutableStateOf(animal.trackerId) }
     var ageText by remember { mutableStateOf(animal.ageYears.toString()) }
+
+    var isBreedDropdownExpanded by remember { mutableStateOf(false) }
 
     val isNameValid = name.trim().isNotEmpty()
 
@@ -602,31 +594,60 @@ fun EditAnimalDialog(
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
-                OutlinedTextField(
-                    value = breed,
-                    onValueChange = { breed = it },
-                    label = { Text("Raza") },
-                    singleLine = true,
+
+                // DESPLEGABLE DE RAZAS (VACAS)
+                ExposedDropdownMenuBox(
+                    expanded = isBreedDropdownExpanded,
+                    onExpandedChange = { isBreedDropdownExpanded = it },
                     modifier = Modifier.fillMaxWidth()
-                )
+                ) {
+                    OutlinedTextField(
+                        value = breed,
+                        onValueChange = { breed = it },
+                        readOnly = true,
+                        label = { Text("Raza del Ganado *") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isBreedDropdownExpanded) },
+                        modifier = Modifier.menuAnchor().fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = isBreedDropdownExpanded,
+                        onDismissRequest = { isBreedDropdownExpanded = false }
+                    ) {
+                        COMMON_CATTLE_BREEDS.forEach { b ->
+                            DropdownMenuItem(
+                                text = { Text(b) },
+                                onClick = {
+                                    breed = b
+                                    isBreedDropdownExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                // IDENTIFICADORES: ACEPTA SOLO NÚMEROS
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = displayNumber,
-                        onValueChange = { displayNumber = it },
-                        label = { Text("Número (Ej: 07)") },
+                        onValueChange = { input -> displayNumber = input.filter { it.isDigit() } },
+                        label = { Text("Número (Solo dígitos)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
                     OutlinedTextField(
                         value = tagNumber,
-                        onValueChange = { tagNumber = it },
-                        label = { Text("Arete") },
+                        onValueChange = { input -> tagNumber = input.filter { it.isDigit() } },
+                        label = { Text("Arete (Solo dígitos)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
                 }
+
+                // EDAD: ACEPTA SOLO NÚMEROS ENTEROS
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = ageText,
-                        onValueChange = { ageText = it },
+                        onValueChange = { input -> ageText = input.filter { it.isDigit() } },
                         label = { Text("Edad (Años)") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
@@ -647,7 +668,7 @@ fun EditAnimalDialog(
                         onSave(
                             animal.copy(
                                 name = name.trim(),
-                                breed = breed.trim(),
+                                breed = breed.trim().ifEmpty { "Mestizo / Criollo" },
                                 displayNumber = displayNumber.trim().ifEmpty { animal.displayNumber },
                                 tagNumber = tagNumber.trim().ifEmpty { animal.tagNumber },
                                 trackerId = trackerId.trim().ifEmpty { animal.trackerId },
@@ -680,17 +701,20 @@ fun EditAnimalDialog(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddAnimalDialog(
     onDismiss: () -> Unit,
     onSave: (Animal) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
-    var breed by remember { mutableStateOf("") }
+    var breed by remember { mutableStateOf("Brahman") }
     var displayNumber by remember { mutableStateOf("") }
     var tagNumber by remember { mutableStateOf("") }
     var trackerId by remember { mutableStateOf("") }
     var ageText by remember { mutableStateOf("2") }
+
+    var isBreedDropdownExpanded by remember { mutableStateOf(false) }
 
     val isNameValid = name.trim().isNotEmpty()
 
@@ -702,36 +726,65 @@ fun AddAnimalDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { name = it },
-                    label = { Text("Nombre o Identificador *") },
+                    label = { Text("Nombre del Animal *") },
                     isError = !isNameValid,
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth()
                 )
-                OutlinedTextField(
-                    value = breed,
-                    onValueChange = { breed = it },
-                    label = { Text("Raza (Ej: Holstein, Brahman)") },
-                    singleLine = true,
+
+                // DESPLEGABLE DE RAZA (VACAS)
+                ExposedDropdownMenuBox(
+                    expanded = isBreedDropdownExpanded,
+                    onExpandedChange = { isBreedDropdownExpanded = it },
                     modifier = Modifier.fillMaxWidth()
-                )
+                ) {
+                    OutlinedTextField(
+                        value = breed,
+                        onValueChange = { breed = it },
+                        readOnly = true,
+                        label = { Text("Raza del Ganado *") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = isBreedDropdownExpanded) },
+                        modifier = Modifier.menuAnchor().fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = isBreedDropdownExpanded,
+                        onDismissRequest = { isBreedDropdownExpanded = false }
+                    ) {
+                        COMMON_CATTLE_BREEDS.forEach { b ->
+                            DropdownMenuItem(
+                                text = { Text(b) },
+                                onClick = {
+                                    breed = b
+                                    isBreedDropdownExpanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                // IDENTIFICADORES: ACEPTA SOLO NÚMEROS
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = displayNumber,
-                        onValueChange = { displayNumber = it },
-                        label = { Text("Número (Ej: 07)") },
+                        onValueChange = { input -> displayNumber = input.filter { it.isDigit() } },
+                        label = { Text("Número (Solo dígitos)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
                     OutlinedTextField(
                         value = tagNumber,
-                        onValueChange = { tagNumber = it },
-                        label = { Text("Arete (Ej: #0342)") },
+                        onValueChange = { input -> tagNumber = input.filter { it.isDigit() } },
+                        label = { Text("Arete (Solo dígitos)") },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
                     )
                 }
+
+                // EDAD: ACEPTA SOLO NÚMEROS ENTEROS
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedTextField(
                         value = ageText,
-                        onValueChange = { ageText = it },
+                        onValueChange = { input -> ageText = input.filter { it.isDigit() } },
                         label = { Text("Edad (Años)") },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier.weight(1f)
@@ -750,7 +803,7 @@ fun AddAnimalDialog(
                 onClick = {
                     if (isNameValid) {
                         val num = displayNumber.trim().ifEmpty { (10..99).random().toString() }
-                        val tag = tagNumber.trim().ifEmpty { "#${(1000..9999).random()}" }
+                        val tag = tagNumber.trim().ifEmpty { "${(1000..9999).random()}" }
                         val trk = trackerId.trim().ifEmpty { "TRK-${(1000..9999).random()}" }
                         val newAnimal = Animal(
                             id = "a-${System.currentTimeMillis()}",
@@ -758,7 +811,7 @@ fun AddAnimalDialog(
                             name = name.trim(),
                             tagNumber = tag,
                             displayNumber = num,
-                            breed = breed.trim().ifEmpty { "Mestizo" },
+                            breed = breed.trim().ifEmpty { "Mestizo / Criollo" },
                             ageYears = ageText.toIntOrNull() ?: 2,
                             weightKg = 450f,
                             photoUrl = null,

@@ -160,21 +160,42 @@ class CircleGeofence(
     }
 }
 
+enum class AlertLevel {
+    INFO,       // Verde: Dispositivos conectados correctamente, sincronización, estado nominal
+    WARNING,    // Amarillo suave: Ganado quieto por mucho tiempo, batería baja, advertencias preventivas
+    CRITICAL    // Rojo: Salida de potrero / geocerca, desconexión repentina, emergencias
+}
+
 data class AppAlert(
     val title: String,
     val description: String,
     val time: String,
+    val level: AlertLevel = AlertLevel.INFO,
     val severity: String = "HIGH",
     val animalId: String? = null
 )
 
+/**
+ * Ordena los vértices de un polígono en sentido antihorario respecto a su centroide.
+ * Previene el cruce de aristas (forma de reloj de arena / hourglass) cuando los 4 puntos se marcan en cruz.
+ */
+fun orderPointsConvex(points: List<GeoPoint>): List<GeoPoint> {
+    if (points.size <= 2) return points
+    val centerLat = points.map { it.lat }.average()
+    val centerLng = points.map { it.lng }.average()
+    return points.sortedBy { p ->
+        Math.atan2(p.lat - centerLat, p.lng - centerLng)
+    }
+}
+
 fun calculateAreaHa(points: List<GeoPoint>): Float {
-    if (points.size < 3) return 0f
+    val ordered = orderPointsConvex(points)
+    if (ordered.size < 3) return 0f
     var area = 0.0
     val earthRadius = 6378137.0
-    for (i in points.indices) {
-        val p1 = points[i]
-        val p2 = points[(i + 1) % points.size]
+    for (i in ordered.indices) {
+        val p1 = ordered[i]
+        val p2 = ordered[(i + 1) % ordered.size]
         val lat1 = Math.toRadians(p1.lat)
         val lat2 = Math.toRadians(p2.lat)
         val lng1 = Math.toRadians(p1.lng)

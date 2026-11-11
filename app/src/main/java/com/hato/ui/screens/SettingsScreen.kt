@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.hato.data.repository.SessionManager
 import com.hato.ui.map.MapViewModel
 import com.hato.ui.theme.ThemeState
 
@@ -36,6 +37,7 @@ fun SettingsScreen(
     onLogout: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val sessionManager = remember { SessionManager(context) }
     var showLogoutDialog by remember { mutableStateOf(false) }
 
     val btLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
@@ -98,7 +100,7 @@ fun SettingsScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // 1. Tarjeta de Apariencia
+            // 1. Tarjeta de Apariencia (Modo Oscuro / Claro)
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
@@ -113,20 +115,23 @@ fun SettingsScreen(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            "Modo Oscuro",
+                            text = if (ThemeState.isDarkMode.value) "Modo Oscuro" else "Modo Claro",
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onSurface,
                             fontSize = 17.sp
                         )
                         Text(
-                            "Tema visual optimizado para campo y sol",
+                            text = if (ThemeState.isDarkMode.value) "Diseño Verdant Precision (Slate nocturno)" else "Diseño de Alto Contraste para Campo y Sol",
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             fontSize = 12.sp
                         )
                     }
                     Switch(
                         checked = ThemeState.isDarkMode.value,
-                        onCheckedChange = { ThemeState.isDarkMode.value = it }
+                        onCheckedChange = { isDark ->
+                            ThemeState.isDarkMode.value = isDark
+                            sessionManager.saveDarkMode(isDark)
+                        }
                     )
                 }
             }
@@ -247,11 +252,11 @@ fun SettingsScreen(
                 }
             }
 
-            // 4. CARRUSEL DE DISPOSITIVOS VINCULADOS (Con emoji de vaca 🐮 y estado en vivo)
+            // 4. CARRUSEL DE DISPOSITIVOS VINCULADOS (Permanentes, con emoji de vaca 🐮 y estado en vivo)
             if (viewModel.connectedDevices.isNotEmpty()) {
                 Column {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("📡", fontSize = 20.sp)
+                        Text("🐮", fontSize = 22.sp)
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             "Dispositivos Vinculados Activos",
@@ -268,8 +273,8 @@ fun SettingsScreen(
                     ) {
                         items(viewModel.connectedDevices) { deviceName ->
                             Card(
-                                modifier = Modifier.width(220.dp),
-                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                                modifier = Modifier.width(230.dp),
+                                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
                                 shape = RoundedCornerShape(16.dp),
                                 elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
                             ) {
@@ -277,36 +282,50 @@ fun SettingsScreen(
                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                         Text("🐮", fontSize = 32.sp)
                                         Spacer(modifier = Modifier.width(10.dp))
-                                        Column {
+                                        Column(modifier = Modifier.weight(1f)) {
                                             Text(
                                                 deviceName,
                                                 fontWeight = FontWeight.Bold,
-                                                fontSize = 14.sp,
-                                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                fontSize = 13.sp,
+                                                color = MaterialTheme.colorScheme.onSurface,
                                                 maxLines = 1
                                             )
                                             Text(
-                                                "En Vivo · Batería 95%",
-                                                fontSize = 10.sp,
-                                                color = MaterialTheme.colorScheme.primary
+                                                "En Vivo · Batería 96%",
+                                                fontSize = 11.sp,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                fontWeight = FontWeight.Bold
                                             )
                                         }
                                     }
                                     Spacer(modifier = Modifier.height(10.dp))
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            Icons.Default.Check,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(16.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(4.dp))
-                                        Text(
-                                            "Transmitiendo GPS",
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = MaterialTheme.colorScheme.primary
-                                        )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Row(verticalAlignment = Alignment.CenterVertically) {
+                                            Icon(
+                                                Icons.Default.Check,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(16.dp)
+                                            )
+                                            Spacer(modifier = Modifier.width(4.dp))
+                                            Text(
+                                                "Transmitiendo GPS",
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+
+                                        TextButton(
+                                            onClick = { viewModel.unlinkDevice(deviceName) },
+                                            contentPadding = PaddingValues(0.dp)
+                                        ) {
+                                            Text("Quitar", fontSize = 11.sp, color = MaterialTheme.colorScheme.error)
+                                        }
                                     }
                                 }
                             }

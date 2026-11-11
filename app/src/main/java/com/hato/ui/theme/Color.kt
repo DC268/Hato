@@ -2,9 +2,11 @@ package com.hato.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Sistema de Color "Verdant Precision" para Hato Ganadería Digital
-// Tonos Deep Forest Slate, Esmeralda Luminous y Acabados Técnicos
+// =========================================================================
+// SISTEMA DE COLOR "VERDANT PRECISION" (HATO GANADERÍA DIGITAL)
+// =========================================================================
 
+// --- MODO OSCURO (DEEP FOREST SLATE & LUMINOUS EMERALD) ---
 val SurfaceDark = Color(0xFF0D1512)
 val SurfaceDimDark = Color(0xFF0D1512)
 val SurfaceBrightDark = Color(0xFF333B37)
@@ -39,10 +41,51 @@ val OnTertiary = Color(0xFF003825)
 val TertiaryContainer = Color(0xFF00B982)
 val OnTertiaryContainer = Color(0xFF00422C)
 
+// Alertas Urgentes (Rojo)
 val Error = Color(0xFFFFB4AB)
 val OnError = Color(0xFF690005)
 val ErrorContainer = Color(0xFF93000A)
 val OnErrorContainer = Color(0xFFFFDAD6)
+
+// Alertas Preventivas (Amarillo suave / Amber acorde a la app)
+val WarningYellow = Color(0xFFFBBF24)
+val WarningYellowContainer = Color(0xFF3B2800)
+val OnWarningYellowContainer = Color(0xFFFFDF9E)
+
+// --- MODO CLARO (HIGH-VISIBILITY FIELD MOCKUP SYSTEM) ---
+val LightBackground = Color(0xFFF4F7F5)
+val LightSurface = Color(0xFFFFFFFF)
+val LightSurfaceContainerLowest = Color(0xFFFFFFFF)
+val LightSurfaceContainerLow = Color(0xFFF0F5F2)
+val LightSurfaceContainer = Color(0xFFE8F0EC)
+val LightSurfaceContainerHigh = Color(0xFFDFEAE4)
+val LightSurfaceContainerHighest = Color(0xFFD6E3DC)
+
+val LightOnSurface = Color(0xFF0D1512)
+val LightOnSurfaceVariant = Color(0xFF38473F)
+
+val LightPrimary = Color(0xFF059669)
+val LightOnPrimary = Color(0xFFFFFFFF)
+val LightPrimaryContainer = Color(0xFFD1FAE5)
+val LightOnPrimaryContainer = Color(0xFF064E3B)
+
+val LightSecondary = Color(0xFF047857)
+val LightOnSecondary = Color(0xFFFFFFFF)
+val LightSecondaryContainer = Color(0xFFA7F3D0)
+val LightOnSecondaryContainer = Color(0xFF064E3B)
+
+val LightTertiary = Color(0xFF10B981)
+val LightOutline = Color(0xFF708075)
+val LightOutlineVariant = Color(0xFFC7D4CD)
+
+val LightError = Color(0xFFDC2626)
+val LightOnError = Color(0xFFFFFFFF)
+val LightErrorContainer = Color(0xFFFEE2E2)
+val LightOnErrorContainer = Color(0xFF7F1D1D)
+
+val LightWarningYellow = Color(0xFFD97706)
+val LightWarningYellowContainer = Color(0xFFFEF3C7)
+val LightOnWarningYellowContainer = Color(0xFF78350F)
 
 // Aliases para compatibilidad con código existente
 val PrimaryGreen = Primary

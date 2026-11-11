@@ -49,22 +49,51 @@ private val DarkColorScheme = darkColorScheme(
     outlineVariant = OutlineVariant
 )
 
-private val LightColorScheme = darkColorScheme( // Para campo y alta precisión, se mantiene la paleta ejecutiva de alto contraste
-    primary = Primary,
-    onPrimary = OnPrimary,
-    primaryContainer = PrimaryContainer,
-    onPrimaryContainer = OnPrimaryContainer,
-    secondary = Secondary,
-    background = SurfaceDark,
-    surface = SurfaceDark,
-    onSurface = OnSurface,
-    surfaceVariant = SurfaceContainerHigh,
-    outline = Outline,
-    outlineVariant = OutlineVariant
+private val LightColorScheme = lightColorScheme(
+    primary = LightPrimary,
+    onPrimary = LightOnPrimary,
+    primaryContainer = LightPrimaryContainer,
+    onPrimaryContainer = LightOnPrimaryContainer,
+    inversePrimary = LightPrimary,
+
+    secondary = LightSecondary,
+    onSecondary = LightOnSecondary,
+    secondaryContainer = LightSecondaryContainer,
+    onSecondaryContainer = LightOnSecondaryContainer,
+
+    tertiary = LightTertiary,
+    onTertiary = LightOnPrimary,
+    tertiaryContainer = LightPrimaryContainer,
+    onTertiaryContainer = LightOnPrimaryContainer,
+
+    error = LightError,
+    onError = LightOnError,
+    errorContainer = LightErrorContainer,
+    onErrorContainer = LightOnErrorContainer,
+
+    background = LightBackground,
+    onBackground = LightOnSurface,
+
+    surface = LightSurface,
+    onSurface = LightOnSurface,
+    surfaceVariant = LightSurfaceContainerHigh,
+    onSurfaceVariant = LightOnSurfaceVariant,
+
+    surfaceContainerLowest = LightSurfaceContainerLowest,
+    surfaceContainerLow = LightSurfaceContainerLow,
+    surfaceContainer = LightSurfaceContainer,
+    surfaceContainerHigh = LightSurfaceContainerHigh,
+    surfaceContainerHighest = LightSurfaceContainerHighest,
+
+    inverseSurface = SurfaceDark,
+    inverseOnSurface = OnSurface,
+
+    outline = LightOutline,
+    outlineVariant = LightOutlineVariant
 )
 
 @Composable
-fun HatoTheme(darkTheme: Boolean = true, content: @Composable () -> Unit) {
+fun HatoTheme(darkTheme: Boolean = ThemeState.isDarkMode.value, content: @Composable () -> Unit) {
     val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
     
     MaterialTheme(
