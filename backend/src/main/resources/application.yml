@@ -51,7 +51,7 @@ hato:
     key: ${HATO_INGEST_KEY:hato-secret-ingest-key-2026}
 
   google:
-    client-id: ${GOOGLE_CLIENT_ID:982736451234-sampleclientidhato.apps.googleusercontent.com}
+    client-id: ${GOOGLE_CLIENT_ID:959611401831-0lil3q672ahjuru06gsunc3pdu1lhdmh.apps.googleusercontent.com}
 
   gps:
     tcp-port: ${HATO_GPS_TCP_PORT:5023}

@@ -62,8 +62,8 @@ fun LoginScreen(
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
-    // Client ID web para Google Sign-In
-    val webClientId = "982736451234-sampleclientidhato.apps.googleusercontent.com"
+    // Client ID web oficial de Google Cloud para Google Sign-In / Credential Manager
+    val webClientId = "959611401831-0lil3q672ahjuru06gsunc3pdu1lhdmh.apps.googleusercontent.com"
 
     fun performGoogleSignIn() {
         coroutineScope.launch {
