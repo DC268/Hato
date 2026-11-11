@@ -8,7 +8,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -78,8 +80,9 @@ class MainActivity : ComponentActivity() {
                                     contentDescription = "Portada Hato",
                                     modifier = Modifier
                                         .size(130.dp)
-                                        .clip(RoundedCornerShape(30.dp)),
-                                    contentScale = ContentScale.Fit
+                                        .clip(CircleShape)
+                                        .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), CircleShape),
+                                    contentScale = ContentScale.Crop
                                 )
                                 Spacer(modifier = Modifier.height(20.dp))
                                 Text(

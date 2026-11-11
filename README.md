@@ -1,195 +1,202 @@
-# 🐮 Hato - Gestión y Monitoreo Ganadero Inteligente en Tiempo Real
+<div align="center">
 
-Plataforma integral para el rastreo y telemetría de ganado en tiempo real mediante collares GPS, geocercas inteligentes (polígonos y círculos), detección automática de fugas e inactividad, comunicación WebSocket bidireccional y autenticación segura con JWT y Google Sign-In.
+  <img src="app/src/main/res/drawable/app_logo.png" alt="Hato Logo" width="130" style="border-radius: 50%;" />
+
+  # 🐮 HATO
+  ### Plataforma Integral de Gestión Ganadera y Telemetría en Tiempo Real
+
+  [![Android](https://img.shields.io/badge/Platform-Android_8.0+-3DDC84?style=flat&logo=android&logoColor=white)](https://developer.android.com)
+  [![Kotlin](https://img.shields.io/badge/Kotlin-2.0.20-7F52FF?style=flat&logo=kotlin&logoColor=white)](https://kotlinlang.org)
+  [![Jetpack Compose](https://img.shields.io/badge/UI-Jetpack_Compose-4285F4?style=flat&logo=jetpackcompose&logoColor=white)](https://developer.android.com/jetpack/compose)
+  [![Spring Boot](https://img.shields.io/badge/Backend-Spring_Boot_3.3.4-6DB33F?style=flat&logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+  [![Java](https://img.shields.io/badge/JDK-Java_21_LTS-ED8B00?style=flat&logo=openjdk&logoColor=white)](https://openjdk.org)
+  [![Database](https://img.shields.io/badge/Database-PostgreSQL_/_Supabase-336791?style=flat&logo=postgresql&logoColor=white)](https://supabase.com)
+  [![Cloud](https://img.shields.io/badge/Deploy-Render_Cloud-46E3B7?style=flat&logo=render&logoColor=white)](https://render.com)
+  [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
+  <p align="center">
+    <b>Monitoreo GPS Satelital • Geocercas Inteligentes • Detección de Fugas e Inactividad • Pesaje y Proyección Comercial • Alertas en Tiempo Real</b>
+  </p>
+
+  [📲 Descargar APK](#-instalación-y-descarga-móvil) •
+  [🌐 Backend en Vivo](#-despliegue-en-la-nube-render) •
+  [✨ Características](#-características-principales) •
+  [🏛️ Arquitectura](#-arquitectura-del-sistema) •
+  [🚀 Guía de Inicio](#-guía-de-inicio-rápido)
+</div>
 
 ---
 
-## 🚀 Despliegue en Render (En Vivo)
+## 📲 Instalación y Descarga Móvil
 
-El backend de Spring Boot se encuentra desplegado y funcionando en la nube de Render:
+Puedes instalar la aplicación directamente en cualquier dispositivo Android (8.0 o superior):
 
-* 🌐 **URL Pública del Backend:** `https://hato-backend-gkq3.onrender.com`
-* 🩺 **Health Check:** [https://hato-backend-gkq3.onrender.com/actuator/health](https://hato-backend-gkq3.onrender.com/actuator/health) (Respuesta: `{"status":"UP"}`)
+<div align="center">
+  <table>
+    <tr>
+      <td align="center" width="280">
+        <img src="apk/hato-download-qr.png" alt="Código QR Descarga Hato" width="220" />
+        <br />
+        <sub><b>📱 Escanea para Descargar el APK</b></sub>
+      </td>
+      <td valign="middle">
+        <h3>Descarga Directa</h3>
+        <p>Apunta la cámara de tu celular al código QR o pulsa el botón oficial para descargar el APK compilado:</p>
+        <p>
+          <a href="https://github.com/DC268/Hato/raw/main/apk/hato-app.apk">
+            <img src="https://img.shields.io/badge/Descargar_APK-hato--app.apk_(12.2_MB)-005C3B?style=for-the-badge&logo=android&logoColor=white" alt="Descargar APK" />
+          </a>
+        </p>
+        <ul>
+          <li><b>Archivo:</b> <code>apk/hato-app.apk</code></li>
+          <li><b>Autenticación:</b> Correo/Contraseña cifrada y Google Sign-In oficial (Credential Manager)</li>
+          <li><b>Hardware:</b> Compatible con collares GPS Bluetooth BLE y receptores satelitales</li>
+        </ul>
+      </td>
+    </tr>
+  </table>
+</div>
+
+---
+
+## 🌐 Despliegue en la Nube (Render)
+
+El microservicio de backend está desplegado y operativo en la nube de Render conectado a PostgreSQL en Supabase:
+
+* 🌐 **URL Base del API:** `https://hato-backend-gkq3.onrender.com`
+* 🩺 **Health Check:** [`https://hato-backend-gkq3.onrender.com/actuator/health`](https://hato-backend-gkq3.onrender.com/actuator/health) (Respuesta: `{"status":"UP"}`)
 * 📡 **WebSocket en Vivo:** `wss://hato-backend-gkq3.onrender.com/ws/live?farmId={id}`
 * 🗄️ **Base de Datos:** PostgreSQL en Supabase AWS (Oregon).
 
 ---
 
-## 📱 Descarga Directa del APK Android
+## ✨ Características Principales
 
-Puedes descargar el archivo APK compilado y listo para instalar en tu teléfono o tableta Android directamente desde este repositorio:
+### 🗺️ 1. Mapa Satelital y Geocercas Dinámicas
+- Visualización cartográfica fluida mediante **OSMDroid** (OpenStreetMap, sin cuotas ni API keys de Google Maps).
+- Creación interactiva de potreros mediante polígonos o círculos con algoritmo de ordenamiento convexo para prevenir intersecciones cruzadas.
+- Monitoreo en vivo de animales con identificador de emoji de vaca (🐮) y telemetría de batería.
+- Filtrado inteligente: el usuario solo visualiza los potreros, trayectorias y animales creados por su cuenta.
 
-* 📥 **[Descargar Hato APK (hato-app.apk)](./apk/hato-app.apk)** *(12.95 MB)*
-* 📥 **[Descargar Hato Debug APK (hato-debug.apk)](./apk/hato-debug.apk)**
+### 🐮 2. Gestión del Hato y Proyección Comercial
+- Registro de bovinos con arete/RFID (únicamente numérico), raza, edad y peso en kilogramos (`kg`).
+- **Calculadora Automática de Valor Comercial**: Proyección en vivo de la ganancia estimada de venta basada en el precio de ganado en pie en Colombia (~$9.000 COP/kg).
+- Acciones rápidas al tocar un animal: ubicar directamente en el mapa o editar sus especificaciones.
 
-> **Requisitos:** Android 8.0 (API 26) o superior. Habilitar permisos de Ubicación y Bluetooth para vincular collares GPS cercanos.
+### 🔔 3. Sistema de Alertas Jerárquico en 3 Niveles
+- 🟢 **Informativas (Verde):** Dispositivos y collares conectados exitosamente, sincronización activa.
+- 🟡 **Preventivas (Amarillo):** Ganado con inactividad prolongada o comportamiento anormal.
+- 🔴 **Urgentes (Rojo):** Fuga de geocerca, cruce de perímetro o batería crítica.
+
+### 📡 4. Conectividad Bluetooth & Collares GPS
+- Escaneo y vinculación de dispositivos Bluetooth cercanos en carrusel horizontal.
+- Persistencia permanente de dispositivos vinculados.
+- Descarte automático del propio teléfono para evitar que se interprete a sí mismo como collar.
+
+### 🔐 5. Seguridad y Autenticación Oficial con Google
+- Inicio de sesión con correo y contraseña protegidos con hash BCrypt y tokens JWT.
+- Integración oficial con **Google Sign-In / Credential Manager** mediante Google Cloud OAuth 2.0 y verificación criptográfica en backend (`GoogleIdTokenVerifier`).
+- Creación automática de cuenta para nuevos usuarios y acceso directo para usuarios existentes.
 
 ---
 
-## 📂 Organización y Distribución del Proyecto
+## 🏛️ Arquitectura del Sistema
 
-El repositorio ha sido reorganizado de manera modular:
-
-```text
-Hato/
-├── app/                                   # 📱 FRONTEND ANDROID STUDIO (100% KOTLIN)
-│   ├── src/main/java/com/hato/
-│   │   ├── MainActivity.kt               # Punto de entrada de la app
-│   │   ├── domain/
-│   │   │   ├── model/Models.kt           # Modelos inmutables (GeoPoint, Animal, Farm, Geofence, etc.)
-│   │   │   └── engine/HatoEngine.kt      # Algoritmo de confirmación de salida y tolerancia GPS
-│   │   ├── data/
-│   │   │   ├── api/                      # Clientes Retrofit (HatoApiService, ApiClient, AuthInterceptor)
-│   │   │   ├── dto/Dtos.kt               # Contratos DTO de red (Auth, Position, Animal, Zone, Alert)
-│   │   │   ├── realtime/                 # Cliente WebSocket en vivo (LiveSocketManager)
-│   │   │   └── repository/               # Manejo de sesiones y tokens (SessionManager)
-│   │   └── ui/
-│   │       ├── MainScreen.kt             # Scaffold principal con navegación por pestañas
-│   │       ├── theme/                    # Colores y temas claro/oscuro dinámicos
-│   │       ├── screens/
-│   │       │   ├── auth/LoginScreen.kt   # Login con Correo/Clave, JWT y Google Sign-In (Credential Manager)
-│   │       │   ├── map/                  # Mapa satelital OSMDroid con dibujo de potreros y rastreo en vivo
-│   │       │   ├── animals/              # Gestión de cabezas de ganado y aretes
-│   │       │   ├── zones/                # Gestión de potreros y geocercas
-│   │       │   ├── alerts/               # Historial de alertas de fuga e inactividad
-│   │       │   └── settings/             # Escaneo y vinculación de collares Bluetooth GPS
-│   │   └── AndroidManifest.xml
-│   └── build.gradle.kts
-│
-├── backend/                               # 🖥️ BACKEND SPRING BOOT (JAVA 21)
-│   ├── src/main/java/com/hato/
-│   │   ├── HatoApplication.java          # Aplicación principal Spring Boot
-│   │   ├── domain/                       # Núcleo de dominio desacoplado
-│   │   │   ├── model/                    # Records inmutables (GeoPoint, Position, AlertEvent sellado, User)
-│   │   │   ├── geofence/                 # Geocercas (PolygonGeofence, CircleGeofence, Ray-Casting, Haversine)
-│   │   │   └── rule/                     # Motor de reglas (OutOfZoneRule, BackInZoneRule, LowBatteryRule, etc.)
-│   │   ├── application/
-│   │   │   ├── service/                  # Servicios de aplicación (AuthService, PositionService, ZoneService, etc.)
-│   │   │   └── notification/             # Despachador de notificaciones con Hilos Virtuales
-│   │   ├── infrastructure/
-│   │   │   ├── persistence/              # Entidades JPA y Repositorios para Supabase (PostgreSQL)
-│   │   │   ├── realtime/                 # Servidor WebSocket (/ws/live?farmId=) para push en tiempo real
-│   │   │   ├── messaging/                # Notificadores FCM y canal de respaldo Telegram
-│   │   │   ├── scheduling/               # Tareas programadas (SignalWatchdog, BatteryMonitor, IdleDetector)
-│   │   │   └── gps/                      # Receptores TCP concurrentes con hilos virtuales y decodificadores GT06/H02
-│   │   ├── api/
-│   │   │   ├── controller/               # Controladores REST (Auth, Farm, Animal, Zone, Alert, Ingest, Report)
-│   │   │   ├── dto/                      # Records DTO de transferencia
-│   │   │   ├── exception/                # Manejador global de excepciones (RFC 7807)
-│   │   │   └── security/                 # Filtro JWT, Verificador criptográfico de Google y BCrypt
-│   │   └── config/                       # Configuración de WebSocket, CORS y propiedades
-│   ├── src/main/resources/
-│   │   ├── application.yml               # Configuración lista para Render y Supabase
-│   │   └── db/migration/V1__init_schema.sql # Esquema SQL compatible con PostgreSQL / PostGIS
-│   ├── Dockerfile                        # Multi-stage Dockerfile con Java 21 LTS
-│   ├── pom.xml                           # Descriptor Maven
-│   └── .env.example                      # Plantilla de variables de entorno
-│
-├── apk/                                   # 📦 Directorio con los APKs descargables
-│   ├── hato-app.apk
-│   └── hato-debug.apk
-│
-├── render.yaml                            # 🚀 Blueprint para despliegue automatizado en Render
-├── build.gradle.kts                       # Configuración Gradle raíz para Android Studio
-└── settings.gradle.kts                    # Configuración de proyectos incluidos (:app)
+```
+                      ┌────────────────────────────────────────┐
+                      │        Dispositivos / Collares         │
+                      │       Bluetooth BLE / GPS Tracker      │
+                      └───────────────────┬────────────────────┘
+                                          │
+                                          ▼
+                      ┌────────────────────────────────────────┐
+                      │       📱 Hato Android Mobile App       │
+                      │  Kotlin 2.0 • Jetpack Compose • MVVM   │
+                      │   OSMDroid Maps • Credential Manager   │
+                      └───────┬────────────────────────┬───────┘
+                              │ REST / HTTPS           │ WSS (Live)
+                              ▼                        ▼
+                      ┌────────────────────────────────────────┐
+                      │       🖥️ Hato Backend Service          │
+                      │  Spring Boot 3.3.4 • Java 21 LTS       │
+                      │  WebSocket Broker • Google Auth Verif  │
+                      └───────────────────┬────────────────────┘
+                                          │ JPA / Hibernate
+                                          ▼
+                      ┌────────────────────────────────────────┐
+                      │       🗄️ Supabase PostgreSQL          │
+                      │   Tablas: users, farms, animals,       │
+                      │   geofences, positions, alerts         │
+                      └────────────────────────────────────────┘
 ```
 
 ---
 
-## 🛠️ Cómo abrir y compilar en Android Studio
+## 📂 Estructura del Proyecto
 
-1. Abre **Android Studio** (Hedgehog, Iguana, Koala o superior).
-2. Selecciona **Open** y navega hasta la carpeta del proyecto `g:\DC\Programas\Hato`.
-3. Android Studio reconocerá automáticamente el proyecto a través de `settings.gradle.kts` (cargando el módulo `:app`).
-4. Espera a que termine la sincronización de Gradle.
-5. Selecciona un dispositivo físico o emulador con Google Play Services y presiona **Run ('app')** (Shift + F10).
-
----
-
-## 🗄️ Configuración de Base de Datos en Supabase (PostgreSQL)
-
-1. Ingresa a tu cuenta en [Supabase](https://supabase.com) y crea un nuevo proyecto (ej. `hato-prod`).
-2. Dirígete a **SQL Editor** en el panel lateral de Supabase.
-3. Copia y pega el contenido del archivo [`backend/src/main/resources/db/migration/V1__init_schema.sql`](./backend/src/main/resources/db/migration/V1__init_schema.sql) y ejecuta el script (**Run**).
-4. El script creará automáticamente las tablas optimizadas con índices:
-   * `users`, `farms`, `memberships`, `trackers`, `zones`, `animals`, `positions`, `alerts`, `device_tokens`.
-5. Ve a **Project Settings > Database > Connection string** y copia la URL JDBC (modo Connection Pooling o Directo).
-
----
-
-## 🚀 Despliegue del Backend en Render
-
-El backend está listo para desplegarse mediante Docker y `render.yaml`.
-
-### Opción A: Despliegue con Render Blueprint (Recomendado)
-1. Conecta tu repositorio de GitHub `https://github.com/DC268/Hato` a Render.
-2. Selecciona **New + > Blueprint** y selecciona el repositorio.
-3. Render detectará automáticamente el archivo `render.yaml` y configurará el servicio web Docker.
-
-### Opción B: Despliegue Manual como Web Service en Render
-1. En Render, crea un **New Web Service**.
-2. Conecta el repositorio `https://github.com/DC268/Hato`.
-3. Configura:
-   * **Runtime:** Docker
-   * **Dockerfile Path:** `backend/Dockerfile`
-   * **Docker Context:** `backend`
-   * **Instance Type:** Free o Starter
-4. Variables de entorno configuradas:
-   * `HATO_DB_URL`: `jdbc:postgresql://aws-0-us-west-2.pooler.supabase.com:5432/postgres?sslmode=require`
-   * `HATO_DB_USER`: `postgres.jlzwhsalduizhuvccsxi`
-   * `HATO_DB_PASSWORD`: `ZxUjFJi8Xgh.pmQ`
-   * `HATO_JWT_SECRET`: `4c9b3d2f8e1a7c5b6a9e8d7c6b5a4f3e2d1c0b9a8f7e6d5c4b3a2f1e0d9c8b7a`
-   * `HATO_INGEST_KEY`: `hato-secret-ingest-key-2026`
-   * `GOOGLE_CLIENT_ID`: `982736451234-sampleclientidhato.apps.googleusercontent.com`
-5. El servicio se encuentra **Live** en `https://hato-backend-gkq3.onrender.com`.
+```text
+Hato/
+├── app/                                   # 📱 Frontend Android Studio (Kotlin 2.0)
+│   ├── src/main/java/com/hato/
+│   │   ├── MainActivity.kt               # Actividad principal, splash screen y navegación
+│   │   ├── domain/                       # Lógica pura de negocio y modelos
+│   │   │   ├── model/Models.kt           # Records (GeoPoint, Animal, Geofence, etc.)
+│   │   │   └── engine/HatoEngine.kt      # Motor de confirmación de salida y tolerancia
+│   │   ├── data/                         # Capa de datos y persistencia
+│   │   │   ├── api/                      # Retrofit (HatoApiService, ApiClient)
+│   │   │   ├── dto/Dtos.kt               # DTOs de autenticación y telemetría
+│   │   │   ├── realtime/                 # Cliente WebSocket (LiveSocketManager)
+│   │   │   └── repository/               # SessionManager (DataStore/SharedPreferences)
+│   │   └── ui/                           # Interfaz de usuario con Jetpack Compose
+│   │       ├── MainScreen.kt             # Scaffold con barra inferior dinámica
+│   │       ├── theme/                    # Sistema de diseño "Verdant Precision"
+│   │       └── screens/                  # Pantallas: Auth, Map, Zones, Animals, Alerts, Settings
+│   └── build.gradle.kts
+│
+├── backend/                               # 🖥️ Backend Spring Boot (Java 21 LTS)
+│   ├── src/main/java/com/hato/
+│   │   ├── HatoApplication.java          # Entrada de la aplicación Spring Boot
+│   │   ├── domain/                       # Modelos de dominio desacoplados
+│   │   ├── application/service/          # Servicios (Auth, Position, Animal, Zone, Alert)
+│   │   ├── infrastructure/               # JPA, WebSocket Handler, Seguridad
+│   │   └── api/                          # Controladores REST (/api/v1/...)
+│   ├── src/main/resources/application.yml# Configuración para Supabase y Render
+│   └── pom.xml                           # Dependencias Maven
+│
+├── apk/                                   # 📦 APKs compilados y códigos QR
+│   ├── hato-app.apk                      # APK más reciente de producción/debug
+│   ├── hato-debug.apk                    # Copia de depuración
+│   └── hato-download-qr.png              # Código QR para instalación en smartphone
+│
+├── render.yaml                            # 🚀 Configuración para despliegue en Render Cloud
+├── build.gradle.kts                       # Script raíz de construcción
+└── settings.gradle.kts                    # Definición del módulo :app
+```
 
 ---
 
-## 🔒 Autenticación: JWT y Google Sign-In
+## 🚀 Guía de Inicio Rápido
 
-### 1. Inicio de Sesión Tradicional (Email / Password)
-* Contraseñas cifradas con algoritmo **BCrypt**.
-* Emisión de tokens **JWT (JJWT 0.12.x)** firmados con HMAC-SHA256 y expiración configurable.
-* Endpoints:
-  * `POST /api/auth/register`
-  * `POST /api/auth/login`
+### Prerrequisitos
+- **Android:** Android Studio Jellyfish / Ladybug o IntelliJ IDEA 2024+, JDK 17 o 21.
+- **Backend:** Java 21 LTS, Maven 3.9+.
 
-### 2. Inicio de Sesión con Google (Google Sign-In)
-* **Android:** Implementado con la moderna API **Credential Manager** (`androidx.credentials` y `GoogleIdTokenCredential`).
-* **Backend:** Implementado en `GoogleTokenVerifierService` con `com.google.api-client:google-api-client`, validando criptográficamente la firma del ID Token contra los certificados JWKS de Google (`/v3/certs`) sin peticiones HTTP redundantes.
-* Endpoint:
-  * `POST /api/auth/google` (recibe `{ "idToken": "..." }` y retorna `{ "token": "...", "user": {...} }`).
+### 1. Ejecutar la App Móvil en Android Studio / IntelliJ
+```bash
+# Compilar el APK directamente desde la terminal
+./gradlew assembleDebug
 
----
+# O abrir el proyecto en Android Studio y seleccionar la configuración 'app'
+```
 
-## 📍 Corrección: Visualización de Dispositivos Vinculados en Tiempo Real
-
-Se resolvió la limitación anterior en la que los collares Bluetooth y teléfonos vinculados no aparecían de inmediato en el mapa:
-1. **Asignación Inmediata de Coordenadas:** Al vincular un collar GPS por Bluetooth en `MapViewModel.connectToDevice()`, se le asigna de inmediato la ubicación actual en el mapa sin requerir que existan geocercas previas.
-2. **Identificador Unificado:** Se unificó el rastreo para que `processPhoneLocation()` actualice tanto el collar del teléfono (`a-phone`) como cualquier MAC vinculado (`a-<mac>`).
-3. **Marcador Visual Diferenciado:** En `MapScreen.kt`, los dispositivos vinculados se dibujan con un marcador con halo fluorescente (`#00E676`), fondo azul de telemetría y distintivo `📡 GPS VINCULADO`.
-4. **WebSocket en Vivo:** Se habilitó la conexión automática al endpoint WebSocket `/ws/live?farmId=...` para recibir coordenadas y alertas en tiempo real desde el servidor.
+### 2. Ejecutar el Backend Localmente
+```bash
+cd backend
+mvn spring-boot:run
+```
 
 ---
 
-## 📡 Endpoints de la API REST
+## 📄 Licencia
 
-| Método | Ruta | Descripción |
-|---|---|---|
-| `POST` | `/api/auth/register` | Registro de usuario ganadero |
-| `POST` | `/api/auth/login` | Inicio de sesión con correo y contraseña |
-| `POST` | `/api/auth/google` | Inicio de sesión y verificación de Google ID Token |
-| `GET` | `/api/farms` | Listar fincas del usuario |
-| `GET` | `/api/farms/{id}/animals` | Listar animales de una finca con su estado |
-| `POST` | `/api/animals` | Crear nuevo animal |
-| `PUT` | `/api/animals/{id}` | Actualizar datos del animal |
-| `GET` | `/api/animals/{id}/track` | Obtener historial de recorrido GPS por fechas |
-| `GET` | `/api/zones` | Listar potreros y geocercas activas |
-| `POST` | `/api/zones` | Crear potrero o geocerca poligonal/circular |
-| `DELETE` | `/api/zones/{id}` | Eliminar geocerca |
-| `GET` | `/api/alerts` | Listar alertas (fugas, inactividad, batería) |
-| `POST` | `/api/alerts/{id}/ack` | Marcar alerta como atendida |
-| `POST` | `/api/ingest/positions` | Ingesta de posiciones GPS (Traccar / LoRa / Móvil) con cabecera `X-Ingest-Key` |
-| `POST` | `/api/devices/token` | Registrar token FCM para notificaciones push |
-| `GET` | `/api/reports/exits` | Reporte consolidado de salidas de zona |
-| `WS` | `/ws/live?farmId={id}` | Conexión WebSocket para streaming en tiempo real |
+Este proyecto se encuentra bajo la licencia **MIT**.

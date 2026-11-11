@@ -5,8 +5,10 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -218,14 +220,15 @@ fun LoginScreen(
     ) {
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Logo y Portada Oficial de Hato
+        // Logo Oficial Circular de Hato
         Image(
             painter = painterResource(id = R.drawable.app_logo),
             contentDescription = "Logo Hato",
             modifier = Modifier
                 .size(110.dp)
-                .clip(RoundedCornerShape(26.dp)),
-            contentScale = ContentScale.Fit
+                .clip(CircleShape)
+                .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), CircleShape),
+            contentScale = ContentScale.Crop
         )
 
         Spacer(modifier = Modifier.height(16.dp))
