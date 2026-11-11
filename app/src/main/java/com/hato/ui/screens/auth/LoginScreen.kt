@@ -373,7 +373,7 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(20.dp))
 
-        // Botón Continuar con Google
+        // Botón Oficial Estándar Continuar con Google
         OutlinedButton(
             onClick = { performGoogleSignIn() },
             modifier = Modifier
@@ -383,13 +383,23 @@ fun LoginScreen(
             colors = ButtonDefaults.outlinedButtonColors(
                 containerColor = MaterialTheme.colorScheme.surface,
                 contentColor = MaterialTheme.colorScheme.onSurface
+            ),
+            border = ButtonDefaults.outlinedButtonBorder.copy(
+                width = 1.dp
             )
         ) {
-            Text(text = "🌐  ", fontSize = 18.sp)
+            Icon(
+                painter = painterResource(id = R.drawable.ic_google_logo),
+                contentDescription = "Google Logo",
+                tint = Color.Unspecified,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
             Text(
-                "Continuar con Google",
+                text = "Continuar con Google",
                 fontSize = 15.sp,
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
             )
         }
 
